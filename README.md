@@ -1,11 +1,25 @@
+<div align="center">
+
+<img src="favicon.svg" width="90" alt="Bench-MFG icon"/>
+
 # Bench-MFG
 
-[![Hydra](https://img.shields.io/badge/Hydra-config-red.svg)](https://hydra.cc/)
-[![uv](https://img.shields.io/badge/uv-package%20manager-purple.svg)](https://github.com/astral-sh/uv)
-[![JAX](https://img.shields.io/badge/JAX-framework-orange.svg)](https://github.com/google/jax)
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+**A benchmark suite for Mean Field Game algorithms**
 
-Benchmark methods for Mean Field Games (MFG).
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![uv](https://img.shields.io/badge/uv-package%20manager-purple.svg)](https://github.com/astral-sh/uv)
+[![ruff](https://img.shields.io/badge/ruff-⚡-gold.svg)](https://github.com/astral-sh/ruff)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen.svg)](https://github.com/pre-commit/pre-commit)
+[![arXiv](https://img.shields.io/badge/arXiv-2602.12517-b31b1b.svg)](https://arxiv.org/pdf/2602.12517)
+
+</div>
+
+---
+
+## Overview
+
+Bench-MFG provides a unified framework for benchmarking algorithms on Mean Field Game (MFG) environments. It supports multiple solvers configured through [Hydra](https://hydra.cc) and accelerated with [JAX](https://github.com/google/jax).
 
 ### Environments
 
@@ -69,56 +83,71 @@ Benchmark methods for Mean Field Games (MFG).
 </tbody>
 </table>
 
-**Framework Features:** ✓ Hydra • ✓ JAX & Python • ✓ Log, Save and Plot
+**Framework Features:** ✓ Hydra · ✓ JAX & Python · ✓ Log, Save and Plot
 
-## Easy Start
+---
+
+## Quick Start
 
 ```bash
-# Setup environment
+# Create and activate environment
 uv venv --python 3.11
 source .venv/bin/activate
+
+# Install dependencies
 uv pip install -e .
 ```
-### Run experiment
-Modify the `config/defaults.yaml` selecting algorithm and environment. Then run:
+
+### Run an experiment
+
+Select your algorithm and environment in `conf/defaults.yaml`, then:
+
 ```bash
 python main.py
 ```
 
-## Running Experiments
-See [EXPERIMENTS.md](EXPERIMENTS.md) for detailed instructions on how to run experiments in batch.
+For detailed instructions on batch runs see [EXPERIMENTS.md](EXPERIMENTS.md).
 
-### Configuration
+---
 
-Edit configuration files in `conf/`:
-- `conf/defaults.yaml`: Main configuration
-- `conf/algorithm/`: Algorithm-specific settings
-- `conf/environment/`: Environment configurations
-- `conf/logging/logging.yaml`: WandB logging settings
+## Configuration
+
+All configuration lives under `conf/` and is managed by Hydra:
+
+| File / Folder | Purpose |
+|---|---|
+| `conf/defaults.yaml` | Top-level defaults |
+| `conf/algorithm/` | Per-algorithm settings (pso, omd, pi, …) |
+| `conf/environment/` | Environment configurations |
+| `conf/experiment/` | Experiment overrides |
+| `conf/logging/` | WandB logging settings |
+| `conf/visualization/` | Plot settings |
+
+---
 
 ## Repository Structure
 
 ```
 Bench-MFG/
-├── conf/                    # Configuration files (Hydra)
-│   ├── defaults.yaml        # Main configuration
-│   ├── algorithm/           # Algorithm configs (pso, omd, pi, etc.)
-│   ├── environment/         # Environment configs
-│   ├── experiment/          # Experiment settings
-│   ├── logging/             # Logging configuration
-│   └── visualization/       # Plotting settings
+├── conf/                    # Hydra configuration files
+│   ├── defaults.yaml
+│   ├── algorithm/
+│   ├── environment/
+│   ├── experiment/
+│   ├── logging/
+│   └── visualization/
 ├── envs/                    # MFG environments
-│   ├── mf_garnet/          # MF Garnet (novel)
+│   ├── mf_garnet/           # MF Garnet (novel)
 │   ├── four_rooms_obstacles/
 │   ├── lasry_lions_chain/
 │   ├── contraction_game/
 │   ├── kinetic_congestion/
 │   ├── sis_epidemic/
-│   └── ...                  # Other environments
-├── learner/                 # Algorithm implementations
-│   ├── jax/                 # JAX implementations
-│   └── python/              # Python implementations
-├── utility/                 # Utilities
+│   └── ...
+├── learner/                 # Solver implementations
+│   ├── jax/                 # JAX-accelerated solvers
+│   └── python/              # Pure-Python solvers
+├── utility/                 # Shared utilities
 │   ├── create_environment.py
 │   ├── create_solver.py
 │   ├── run_training.py
@@ -126,13 +155,18 @@ Bench-MFG/
 │   ├── wandb_logger.py
 │   └── MFGPlots.py
 ├── outputs/                 # Experiment results
-├── scripts/                 # Shell scripts
+├── scripts/                 # Helper shell scripts
 ├── main.py                  # Entry point
 └── pyproject.toml           # Project dependencies
 ```
 
+---
+
 ## Outputs
 
-Results are saved to `outputs/YYYY-MM-DD/EnvironmentName/AlgorithmName/ExperimentName/`:
-- `*_results.npz`: Numerical results (policy, mean field, exploitabilities)
-- `mfg_experiment.log`: Execution logs
+Results are written to `outputs/YYYY-MM-DD/<Env>/<Algorithm>/<Experiment>/`:
+
+| File | Contents |
+|---|---|
+| `*_results.npz` | Policy, mean field, exploitabilities |
+| `mfg_experiment.log` | Full execution log |

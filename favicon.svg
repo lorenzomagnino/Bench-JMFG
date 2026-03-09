@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Background -->
+  <rect width="100" height="100" fill="#f8f7f4" rx="14"/>
+
+  <!--
+    All ribbons converge from a tight band on the left (y: 64–76)
+    and fan out across the full height on the right (y: 5–82).
+    Control points hug the start on the left and the end on the right,
+    producing a smooth sigmoid flow.
+  -->
+
+  <!-- Ribbon 1 – light steel blue (stays near flat, lowest destination) -->
+  <path d="
+    M 8 72 C 26 72, 78 73, 95 74
+    L 95 82 C 78 81, 26 76, 8 76 Z"
+    fill="#8aa4bc" opacity="0.88"/>
+
+  <!-- Ribbon 2 – slate blue -->
+  <path d="
+    M 8 70 C 26 70, 78 51, 95 50
+    L 95 60 C 78 61, 26 72, 8 72 Z"
+    fill="#5b7fa6" opacity="0.88"/>
+
+  <!-- Ribbon 3 – muted purple -->
+  <path d="
+    M 8 68 C 26 68, 78 34, 95 33
+    L 95 43 C 78 42, 26 70, 8 70 Z"
+    fill="#7d5c7a" opacity="0.86"/>
+
+  <!-- Ribbon 4 – terracotta -->
+  <path d="
+    M 8 66 C 26 66, 78 19, 95 18
+    L 95 27 C 78 26, 26 68, 8 68 Z"
+    fill="#b07050" opacity="0.86"/>
+
+  <!-- Ribbon 5 – olive/brown (steepest, topmost destination) -->
+  <path d="
+    M 8 64 C 26 64, 78 6, 95 5
+    L 95 13 C 78 14, 26 66, 8 66 Z"
+    fill="#8a7050" opacity="0.82"/>
+
+  <!-- Thin highlight on each ribbon (top edge, lighter) -->
+  <path d="M 8 72 C 26 72, 78 73, 95 74" stroke="#b8cfe0" stroke-width="0.7" fill="none" opacity="0.6"/>
+  <path d="M 8 70 C 26 70, 78 51, 95 50" stroke="#7ba0c4" stroke-width="0.7" fill="none" opacity="0.5"/>
+  <path d="M 8 68 C 26 68, 78 34, 95 33" stroke="#a07ea0" stroke-width="0.7" fill="none" opacity="0.5"/>
+  <path d="M 8 66 C 26 66, 78 19, 95 18" stroke="#cc9070" stroke-width="0.7" fill="none" opacity="0.5"/>
+  <path d="M 8 64 C 26 64, 78 6, 95 5"  stroke="#a89070" stroke-width="0.7" fill="none" opacity="0.5"/>
+
+  <!-- Convergence dot -->
+  <circle cx="8" cy="70" r="2.8" fill="#5b7fa6" opacity="0.95"/>
+</svg>
