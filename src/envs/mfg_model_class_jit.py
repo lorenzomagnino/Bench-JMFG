@@ -9,6 +9,20 @@ import jax.numpy as jnp
 jax_jit = partial(jax.jit, static_argnames="spec")
 
 
+def get_jax_device(device_str: str = "cpu"):
+    """Return the first JAX device matching the requested backend.
+
+    Args:
+        device_str: ``"cuda"`` maps to the JAX GPU backend; anything else uses CPU.
+                    Falls back to CPU when the requested backend is unavailable.
+    """
+    backend = "gpu" if device_str == "cuda" else "cpu"
+    try:
+        return jax.devices(backend)[0]
+    except RuntimeError:
+        return jax.devices("cpu")[0]
+
+
 @dataclass(frozen=True)
 class EnvSpec:
     environment: MFGStationary
@@ -323,3 +337,49 @@ def exploitability_batch_jax(
         return exploitability_jax(policy, spec, initial_mean_field)
 
     return jax.vmap(single_exploitability)(policies)
+
+
+def exploitability_batch_pmap(
+    policies: jnp.ndarray,
+    spec: EnvSpec,
+    initial_mean_field: jnp.ndarray,
+    num_particles: int,
+) -> jnp.ndarray:
+    """Compute exploitability for a batch of policies, sharding across all JAX devices.
+
+    Uses ``jax.pmap`` to distribute particle evaluation across multiple devices when
+    more than one device is available.  Falls back to the ``vmap`` implementation on
+    single-device setups (the common CPU case).
+
+    Parameters:
+    - policies: Batch of policies with shape (num_particles, S, A)
+    - spec: Static environment specification
+    - initial_mean_field: Initial mean field distribution
+    - num_particles: Number of particles
+
+    Returns:
+    - Array of exploitabilities with shape (num_particles,)
+    """
+    n_devices = len(jax.devices())
+    if n_devices == 1:
+        return exploitability_batch_jax(policies, spec, initial_mean_field, num_particles)
+
+    # Pad particle count to the nearest multiple of n_devices for even sharding.
+    remainder = num_particles % n_devices
+    pad = (n_devices - remainder) % n_devices
+    if pad:
+        padding = jnp.zeros((pad,) + policies.shape[1:], dtype=policies.dtype)
+        policies_padded = jnp.concatenate([policies, padding], axis=0)
+    else:
+        policies_padded = policies
+
+    per_device = policies_padded.shape[0] // n_devices
+    policies_sharded = policies_padded.reshape(
+        n_devices, per_device, *policies.shape[1:]
+    )
+
+    def _per_device_batch(shard):
+        return jax.vmap(lambda p: exploitability_jax(p, spec, initial_mean_field))(shard)
+
+    results = jax.pmap(_per_device_batch)(policies_sharded)
+    return results.reshape(-1)[:num_particles]

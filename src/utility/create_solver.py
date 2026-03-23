@@ -25,7 +25,7 @@ from envs.mf_garnet.mf_garnet_jit import (
     transition_mf_garnet,
 )
 from envs.mfg_model_class import MFGStationary
-from envs.mfg_model_class_jit import EnvSpec
+from envs.mfg_model_class_jit import EnvSpec, get_jax_device
 from envs.multiple_equilibria.multiple_equilibria_jit import (
     reward_multiple_equilibria,
     transition_multiple_equilibria,
@@ -163,6 +163,7 @@ def _create_pso_solver_jax(
     environment: MFGStationary,
     env_name: str,
     algo_cfg: AlgorithmConfig,
+    jax_device=None,
 ) -> PSO_jax:
     """Create a JAX PSO solver for any environment."""
     env_spec = _get_env_spec(environment, env_name)
@@ -177,6 +178,7 @@ def _create_pso_solver_jax(
         policy_type=algo_cfg.pso.policy_type,
         initialization_type=algo_cfg.pso.initialization_type,
         init_policy_temp=algo_cfg.pso.init_policy_temp,
+        jax_device=jax_device,
     )
 
 
@@ -185,6 +187,7 @@ def _create_fp_solver_jax(
     env_name: str,
     initial_policy: np.ndarray,
     algo_cfg: AlgorithmConfig,
+    jax_device=None,
 ) -> DampedFP_jax:
     """Create a JAX DampedFP solver for any environment."""
     env_spec = _get_env_spec(environment, env_name)
@@ -201,6 +204,7 @@ def _create_fp_solver_jax(
         lambda_schedule=cast(LambdaSchedule, algo_cfg.dampedfp.lambda_schedule),
         damped_constant=damped_constant,
         num_transition_steps=algo_cfg.dampedfp.num_transition_steps,
+        jax_device=jax_device,
     )
 
 
@@ -209,6 +213,7 @@ def _create_omd_solver_jax(
     env_name: str,
     initial_policy: np.ndarray,
     algo_cfg: AlgorithmConfig,
+    jax_device=None,
 ) -> OMD_jax:
     """Create a JAX OMD solver for any environment."""
     env_spec = _get_env_spec(environment, env_name)
@@ -219,6 +224,7 @@ def _create_omd_solver_jax(
         num_iterations=algo_cfg.omd.num_iterations,
         early_stopping_enabled=algo_cfg.omd.early_stopping_enabled,
         temperature=algo_cfg.omd.temperature,
+        jax_device=jax_device,
     )
 
 
@@ -227,6 +233,7 @@ def _create_pi_solver_jax(
     env_name: str,
     initial_policy: np.ndarray,
     algo_cfg: AlgorithmConfig,
+    jax_device=None,
 ) -> PI_jax:
     """Create a JAX PI solver for any environment."""
     env_spec = _get_env_spec(environment, env_name)
@@ -238,6 +245,7 @@ def _create_pi_solver_jax(
         variant=cast(PIVariant, algo_cfg.pi.variant),
         temperature=algo_cfg.pi.temperature,
         damped_constant=algo_cfg.pi.damped_constant,
+        jax_device=jax_device,
     )
 
 
@@ -260,29 +268,30 @@ def create_solver(
     """
     algo_cfg: AlgorithmConfig = cfg.algorithm
     env_name = cfg.environment.name
+    jax_device = get_jax_device(cfg.device)
 
     if algo_cfg._target_ == "PSO":
-        solver = _create_pso_solver_jax(environment, env_name, algo_cfg)
+        solver = _create_pso_solver_jax(environment, env_name, algo_cfg, jax_device=jax_device)
     elif algo_cfg._target_ == "DampedFP":
         if algo_cfg.dampedfp.use_python:
             solver = _create_fp_solver_python(environment, initial_policy, algo_cfg)
         else:
             solver = _create_fp_solver_jax(
-                environment, env_name, initial_policy, algo_cfg
+                environment, env_name, initial_policy, algo_cfg, jax_device=jax_device
             )
     elif algo_cfg._target_ == "OMD":
         if algo_cfg.omd.use_python:
             solver = _create_omd_solver_python(environment, initial_policy, algo_cfg)
         else:
             solver = _create_omd_solver_jax(
-                environment, env_name, initial_policy, algo_cfg
+                environment, env_name, initial_policy, algo_cfg, jax_device=jax_device
             )
     elif algo_cfg._target_ == "PI":
         if algo_cfg.pi.use_python:
             solver = _create_pi_solver_python(environment, initial_policy, algo_cfg)
         else:
             solver = _create_pi_solver_jax(
-                environment, env_name, initial_policy, algo_cfg
+                environment, env_name, initial_policy, algo_cfg, jax_device=jax_device
             )
     else:
         raise ValueError(f"Unknown algorithm: {cfg.algorithm._target_}")

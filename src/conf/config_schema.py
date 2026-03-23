@@ -117,3 +117,4 @@ class MFGConfig:
     logging: LoggingConfig = field(default_factory=LoggingConfig)
     visualization: VisualizationConfig = field(default_factory=VisualizationConfig)
     initialization: InitializationConfig = field(default_factory=InitializationConfig)
+    device: str = "cpu"  # "cpu" or "cuda"

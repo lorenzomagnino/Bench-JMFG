@@ -17,6 +17,7 @@ from envs.mfg_model_class_jit import (
     exploitability_jax,
     mean_field_by_transition_kernel_multi_jax,
 )
+import jax
 import jax.numpy as jnp
 import numpy as np
 from tqdm import tqdm
@@ -48,6 +49,7 @@ class PI_jax:
         damped_constant: float | None = (
             None  # for smooth_policy_iteration: None = 1/(k+1), else constant
         ),
+        jax_device=None,
     ) -> None:
         """
         Policy Iteration solver for MFG.
@@ -82,6 +84,11 @@ class PI_jax:
         self.variant = variant
         self.temperature = temperature
         self.damped_constant = damped_constant
+        self.jax_device = jax_device if jax_device is not None else jax.devices("cpu")[0]
+
+    def _put(self, arr):
+        """Place a numpy/JAX array on the configured JAX device."""
+        return jax.device_put(arr, self.jax_device)
 
         if self.variant not in (
             "policy_iteration",
@@ -102,11 +109,11 @@ class PI_jax:
     def initialize(self) -> tuple[PIComponents, list]:
         """Initialize policy iteration components."""
         initial_policy = self.initial_policy
-        current_stationary_mf = jnp.asarray(
+        current_stationary_mf = self._put(
             self.env_spec.environment.stationary_mean_field
         )
         initial_mean_field = mean_field_by_transition_kernel_multi_jax(
-            jnp.asarray(initial_policy),
+            self._put(initial_policy),
             self.env_spec,
             num_iterations=20,
             initial_mean_field=current_stationary_mf,
@@ -116,8 +123,8 @@ class PI_jax:
 
         initial_q_values = np.asarray(
             Q_eval_jax(
-                jnp.asarray(initial_policy),
-                jnp.asarray(initial_mean_field),
+                self._put(initial_policy),
+                self._put(initial_mean_field),
                 self.env_spec,
             )
         )
@@ -130,9 +137,9 @@ class PI_jax:
 
         exploitability = float(
             exploitability_jax(
-                jnp.asarray(initial_policy),
+                self._put(initial_policy),
                 self.env_spec,
-                initial_mean_field=jnp.asarray(initial_mean_field),
+                initial_mean_field=self._put(initial_mean_field),
             )
         )
         exploitabilities = [exploitability]
@@ -163,8 +170,8 @@ class PI_jax:
         ):
             pi_components.q_values = np.asarray(
                 Q_eval_jax(
-                    jnp.asarray(pi_components.policy),
-                    jnp.asarray(pi_components.mean_field),
+                    self._put(pi_components.policy),
+                    self._put(pi_components.mean_field),
                     self.env_spec,
                 )
             )
@@ -175,11 +182,11 @@ class PI_jax:
                     pi_components.q_values, self.temperature
                 )
 
-            current_stationary_mf = jnp.asarray(
+            current_stationary_mf = self._put(
                 self.env_spec.environment.stationary_mean_field
             )
             new_mean_field = mean_field_by_transition_kernel_multi_jax(
-                jnp.asarray(pi_components.policy),
+                self._put(pi_components.policy),
                 self.env_spec,
                 num_iterations=20,
                 initial_mean_field=current_stationary_mf,
@@ -206,9 +213,9 @@ class PI_jax:
 
             exploitability = float(
                 exploitability_jax(
-                    jnp.asarray(pi_components.policy),
+                    self._put(pi_components.policy),
                     self.env_spec,
-                    initial_mean_field=jnp.asarray(pi_components.mean_field),
+                    initial_mean_field=self._put(pi_components.mean_field),
                 )
             )
             exploitabilities.append(exploitability)

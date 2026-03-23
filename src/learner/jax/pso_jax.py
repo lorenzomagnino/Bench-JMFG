@@ -4,9 +4,11 @@ import logging
 from envs.mfg_model_class_jit import (
     EnvSpec,
     exploitability_batch_jax,
+    exploitability_batch_pmap,
     exploitability_jax,
     mean_field_by_transition_kernel_multi_jax,
 )
+import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
@@ -64,6 +66,7 @@ class PSO_jax:
         shuffle: str | None = None,
         init_policy_temp: float
         | None = None,  # temperature for initial policy conversion (if init_solution provided)
+        jax_device=None,
     ) -> None:
         self.env_spec = env_spec
         self.dim = env_spec.environment.N_states * env_spec.environment.N_actions
@@ -81,9 +84,14 @@ class PSO_jax:
         self.initialization_type = initialization_type
         self.shuffle_type = shuffle
         self.policy_type = policy_type  # mellowmax or softmax
+        self.jax_device = jax_device if jax_device is not None else jax.devices("cpu")[0]
         logging.info(
             f"Initialized PSO with {self.num_iterations} iterations, \n{self.num_particles} particles, \ntotal_dim: {self.dim}"
         )
+
+    def _put(self, arr):
+        """Place a numpy/JAX array on the configured JAX device."""
+        return jax.device_put(arr, self.jax_device)
 
     def monitor_evolution(self, positions):
         """
@@ -133,10 +141,10 @@ class PSO_jax:
             exp_logits = np.exp(logits_scaled)
             policies_batch = exp_logits / np.sum(exp_logits, axis=-1, keepdims=True)
 
-        initial_mf = jnp.asarray(self.env_spec.environment.stationary_mean_field)
+        initial_mf = self._put(self.env_spec.environment.stationary_mean_field)
 
-        exploitabilities = exploitability_batch_jax(
-            jnp.asarray(policies_batch),
+        exploitabilities = exploitability_batch_pmap(
+            self._put(policies_batch),
             self.env_spec,
             initial_mf,
             self.num_particles,
@@ -271,11 +279,11 @@ class PSO_jax:
                 )
             else:
                 best_policy = boltzmann_policy(swarm_best_position, self.temperature)
-            current_stationary_mf = jnp.asarray(
+            current_stationary_mf = self._put(
                 self.env_spec.environment.stationary_mean_field
             )
             mean_field = mean_field_by_transition_kernel_multi_jax(
-                best_policy, self.env_spec, 50, initial_mean_field=current_stationary_mf
+                self._put(best_policy), self.env_spec, 50, initial_mean_field=current_stationary_mf
             )
             self.env_spec.environment.stationary_mean_field = np.asarray(mean_field)
 
