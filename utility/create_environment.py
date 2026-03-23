@@ -1,7 +1,5 @@
 """Create the MFG environment based on configuration."""
 
-from typing import Tuple
-
 import numpy as np
 
 from conf.config_schema import EnvironmentConfig, MFGConfig
@@ -23,7 +21,7 @@ from utility.config_utils import (
 
 def create_environment(
     cfg: MFGConfig,
-) -> Tuple[MFGStationary, np.ndarray]:
+) -> tuple[MFGStationary, np.ndarray]:
     """Create the MFG environment and initialize policy based on configuration.
 
     Args:

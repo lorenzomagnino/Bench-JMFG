@@ -153,14 +153,6 @@ class MFGarnet(MFGStationary):
         base[ns] += self.P0_prob[s, a]
         return base
 
-    # to speed up the caculation of g
-    # def _ensure_g_cache(self, mu: np.ndarray) -> None:
-    #     mu = self._mu_normalize(mu)
-    #     if getattr(self, "_cached_mu", None) is not None and np.allclose(mu, self._cached_mu):
-    #         return
-    #     self._cached_mu = mu
-    #     self._G = np.einsum("sapy,y->sap", self.C, mu, optimize=True)
-
     def _transition_distribution(self, mu: np.ndarray, s: int, a: int) -> np.ndarray:
         """
         Compute p(.|s,a,mu) over all next-states as a dense vector of length N_states.

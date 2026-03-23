@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Literal, Tuple
+import logging
+from typing import Literal
 
 import jax.numpy as jnp
 import numpy as np
@@ -11,6 +12,8 @@ from envs.mfg_model_class_jit import (
     exploitability_jax,
     mean_field_by_transition_kernel_multi_jax,
 )
+
+log = logging.getLogger(__name__)
 
 LambdaSchedule = Literal["damped", "pure", "fictitious_play"]
 
@@ -84,7 +87,7 @@ class DampedFP_jax:
 
         return avg_policy
 
-    def initialize(self) -> Tuple[FPState, list]:
+    def initialize(self) -> tuple[FPState, list]:
         current_stationary_mf = jnp.asarray(
             self.env_spec.environment.stationary_mean_field
         )
@@ -113,8 +116,8 @@ class DampedFP_jax:
         state, exploitabilities = self.initialize()
         policy_history: list[np.ndarray] = []
         mean_field_history: list[np.ndarray] = []
-        print(f"Initial Exploitability: {exploitabilities[0]}")
-        print(f"Lambda Schedule: {self.lambda_schedule}")
+        log.info("Initial Exploitability: %s", exploitabilities[0])
+        log.info("Lambda Schedule: %s", self.lambda_schedule)
         if logger is not None:
             logger.log_iteration(0, exploitabilities[0], state.mean_field)
         for k in tqdm(range(1, self.num_iterations + 1), desc="Running"):
@@ -149,7 +152,6 @@ class DampedFP_jax:
             state.policy = policy_best_response
             state_mf_jax = jnp.asarray(state.mean_field)
             if self.lambda_schedule == "fictitious_play" and len(policy_history) > 0:
-                # average_policy = self._average_policies_uniform(policy_history)
                 average_policy = self._average_policies_weighted(
                     policy_history, mean_field_history
                 )
@@ -184,5 +186,5 @@ class DampedFP_jax:
                 initial_mean_field=jnp.asarray(state.mean_field),
             )
         )
-        print(f"Exploitability (returned policy): {final_exploitability}")
+        log.info("Exploitability (returned policy): %s", final_exploitability)
         return final_policy, state.mean_field, exploitabilities

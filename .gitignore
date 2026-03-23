@@ -1,0 +1,39 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Ruff / mypy
+.ruff_cache/
+.mypy_cache/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+
+# Hydra / experiment outputs
+outputs/
+multirun/
+
+# uv lock (keep uv.lock but not cache)
+.uv/

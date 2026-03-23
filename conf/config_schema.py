@@ -9,7 +9,7 @@ from conf.algorithm.algorithm_schema import (
     PIConfig,
     PSOConfig,
 )
-from conf.environment.environemnt_schema import (
+from conf.environment.environment_schema import (
     DynamicsConfig,
     GridConfig,
     InitialDistributionConfig,

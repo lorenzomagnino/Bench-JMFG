@@ -8,7 +8,8 @@ Implements:
 """
 
 from dataclasses import dataclass
-from typing import Literal, Optional, Tuple
+import logging
+from typing import Literal, Optional
 
 import jax.numpy as jnp
 import numpy as np
@@ -21,6 +22,8 @@ from envs.mfg_model_class_jit import (
     mean_field_by_transition_kernel_multi_jax,
 )
 from utility.policy_average import greedy_policy, softmax_policy
+
+log = logging.getLogger(__name__)
 
 PIVariant = Literal[
     "policy_iteration", "smooth_policy_iteration", "boltzmann_policy_iteration"
@@ -97,7 +100,7 @@ class PI_jax:
                     f"damped_constant must be in (0,1], got {self.damped_constant}"
                 )
 
-    def initialize(self) -> Tuple[PIComponents, list]:
+    def initialize(self) -> tuple[PIComponents, list]:
         """Initialize policy iteration components."""
         initial_policy = self.initial_policy
         current_stationary_mf = jnp.asarray(
@@ -141,16 +144,16 @@ class PI_jax:
         """Main Policy Iteration evaluation loop."""
         pi_components, exploitabilities = self.initialize()
 
-        print(f"Initial Exploitability: {exploitabilities[0]}")
-        print(f"PI Variant: {self.variant}")
+        log.info("Initial Exploitability: %s", exploitabilities[0])
+        log.info("PI Variant: %s", self.variant)
 
         if self.variant == "smooth_policy_iteration":
             if self.damped_constant is None:
-                print("Mean field averaging: 1/(k+1) (Fictitious Play style)")
+                log.info("Mean field averaging: 1/(k+1) (Fictitious Play style)")
             else:
-                print(f"Mean field averaging: constant λ={self.damped_constant}")
+                log.info("Mean field averaging: constant λ=%s", self.damped_constant)
         elif self.variant == "boltzmann_policy_iteration":
-            print(f"Temperature: {self.temperature}")
+            log.info("Temperature: %s", self.temperature)
 
         if logger is not None:
             logger.log_iteration(0, exploitabilities[0], pi_components.mean_field)
@@ -217,10 +220,10 @@ class PI_jax:
                 )
 
             if exploitability < 1e-6 and self.early_stopping_enabled:
-                print(f"Reached Exploitability close to zero: {exploitability}")
+                log.info("Reached Exploitability close to zero: %s", exploitability)
                 break
 
-        print(f"Final Exploitability: {exploitabilities[-1]}")
+        log.info("Final Exploitability: %s", exploitabilities[-1])
 
         return (
             pi_components.policy,

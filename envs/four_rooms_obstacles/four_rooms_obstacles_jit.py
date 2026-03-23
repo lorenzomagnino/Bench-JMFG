@@ -15,9 +15,9 @@ def transition_four_rooms_obstacles(
 ) -> jnp.ndarray:
     """Transition function for FourRoomsAversion2D environment."""
     assert environment is not None, "Environment must be provided"
-    assert isinstance(environment, FourRoomsAversion2D), (
-        "Environment must be a FourRoomsAversion2D"
-    )
+    assert isinstance(
+        environment, FourRoomsAversion2D
+    ), "Environment must be a FourRoomsAversion2D"
 
     moves = jnp.array(
         [
@@ -64,9 +64,9 @@ def reward_four_rooms_obstacles(
     """Reward function for FourRoomsAversion2D environment."""
     assert environment is not None, "Environment must be provided"
     assert mean_field is not None, "Mean field must be provided"
-    assert isinstance(environment, FourRoomsAversion2D), (
-        "Environment must be a FourRoomsAversion2D"
-    )
+    assert isinstance(
+        environment, FourRoomsAversion2D
+    ), "Environment must be a FourRoomsAversion2D"
 
     dens = jnp.maximum(mean_field[state], environment.epsilon)
     return -environment.alpha * jnp.log(dens)

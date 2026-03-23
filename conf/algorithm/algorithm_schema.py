@@ -75,9 +75,9 @@ class PIConfig:
     variant: str = "policy_iteration"  # "policy_iteration" | "smooth_policy_iteration" | "boltzmann_policy_iteration"
     init_policy_temp: float = 0.5  # temperature for initial policy creation
     temperature: float = 0.5  # temperature for boltzmann_policy_iteration (used during algorithm iterations)
-    damped_constant: Optional[
-        float
-    ] = None  # for smooth_policy_iteration: None = 1/(k+1), else constant
+    damped_constant: Optional[float] = (
+        None  # for smooth_policy_iteration: None = 1/(k+1), else constant
+    )
 
 
 ConfigStore.instance().store(name="pso", node=PSOConfig)

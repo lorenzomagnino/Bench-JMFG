@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Optional, Tuple
+from typing import Optional
 
 import numpy as np
 
@@ -213,7 +213,7 @@ class MFGStationary:
 
     def Vpi_opt(
         self, mean_field: np.ndarray, mixed_policy: bool = False
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray]:
         """
         Computes the optimal value function and policy for a given mean field using dynamic programming.
 

@@ -1,6 +1,6 @@
 """Plot utilities for MFG experiments."""
 
-from typing import List, Optional
+from typing import Optional
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -313,8 +313,8 @@ def plot_policy(
     return_fig=False,
     fn=None,
     colors: Optional[ColorsConfig] = None,
-    action_labels: Optional[List[str]] = None,
-    action_cmaps: Optional[List[str]] = None,
+    action_labels: Optional[list[str]] = None,
+    action_cmaps: Optional[list[str]] = None,
     cmap: Optional[str] = None,
     cmap_2d: Optional[str] = None,
     show_interval_in_labels: bool = True,
@@ -361,7 +361,7 @@ def plot_policy_1D(
     return_fig=False,
     fn=None,
     colors: Optional[ColorsConfig] = None,
-    action_labels: Optional[List[str]] = None,
+    action_labels: Optional[list[str]] = None,
     cmap: Optional[str] = None,
 ):
     """
@@ -469,8 +469,8 @@ def plot_policy_2D(
     return_fig=False,
     fn=None,
     colors: Optional[ColorsConfig] = None,
-    action_cmaps: Optional[List[str]] = None,
-    action_labels: Optional[List[str]] = None,
+    action_cmaps: Optional[list[str]] = None,
+    action_labels: Optional[list[str]] = None,
     cmap_2d: Optional[str] = None,
     show_interval_in_labels: bool = True,
     tick_step: Optional[int] = None,

@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from functools import partial
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional
 
 import jax
 import jax.numpy as jnp
@@ -127,7 +127,7 @@ def mean_field_by_transition_kernel_multi_jax(
 def Vpi_opt_jax(
     mean_field: jnp.ndarray,
     spec: EnvSpec,
-) -> Tuple[jnp.ndarray, jnp.ndarray]:
+) -> tuple[jnp.ndarray, jnp.ndarray]:
     """Computes the optimal value function using jax.lax.scan."""
     S, A, N = (
         spec.environment.N_states,
