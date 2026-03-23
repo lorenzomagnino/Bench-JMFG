@@ -46,7 +46,8 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token: ${{ secrets.GIT_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          show_full_output: true
           prompt: |
             You are a performance engineering expert. Your job is to deeply optimize this Python codebase.
             CUDA available in this runner: ${{ steps.cuda.outputs.available }}
