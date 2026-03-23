@@ -8,6 +8,7 @@ from envs.mfg_model_class_jit import (
     exploitability_jax,
     mean_field_by_transition_kernel_multi_jax,
 )
+import jax
 import jax.numpy as jnp
 import numpy as np
 from tqdm import tqdm
@@ -33,6 +34,7 @@ class DampedFP_jax:
         lambda_schedule: LambdaSchedule = "damped",
         damped_constant: float = 0.2,
         num_transition_steps: int = 20,
+        jax_device=None,
     ) -> None:
         self.horizon, self.N_states, self.N_actions = (
             env_spec.environment.horizon,
@@ -46,6 +48,11 @@ class DampedFP_jax:
         self.damped_constant = damped_constant
         self.lambda_schedule = lambda_schedule
         self.num_transition_steps = int(num_transition_steps)
+        self.jax_device = jax_device if jax_device is not None else jax.devices("cpu")[0]
+
+    def _put(self, arr):
+        """Place a numpy/JAX array on the configured JAX device."""
+        return jax.device_put(arr, self.jax_device)
 
     def _lambda_k(self, k: int) -> float:
         if self.lambda_schedule == "pure":
@@ -87,11 +94,11 @@ class DampedFP_jax:
         return avg_policy
 
     def initialize(self) -> tuple[FPState, list]:
-        current_stationary_mf = jnp.asarray(
+        current_stationary_mf = self._put(
             self.env_spec.environment.stationary_mean_field
         )
         mu = mean_field_by_transition_kernel_multi_jax(
-            jnp.asarray(self.initial_policy),
+            self._put(self.initial_policy),
             self.env_spec,
             num_iterations=self.num_transition_steps,
             initial_mean_field=current_stationary_mf,
@@ -102,9 +109,9 @@ class DampedFP_jax:
 
         exploitability = float(
             exploitability_jax(
-                jnp.asarray(self.initial_policy),
+                self._put(self.initial_policy),
                 self.env_spec,
-                initial_mean_field=jnp.asarray(mu),
+                initial_mean_field=self._put(mu),
             )
         )
         return FPState(policy=self.initial_policy.copy(), mean_field=mu), [
@@ -121,14 +128,14 @@ class DampedFP_jax:
             logger.log_iteration(0, exploitabilities[0], state.mean_field)
         for k in tqdm(range(1, self.num_iterations + 1), desc="Running"):
             _, policy_best_response = Vpi_opt_jax(
-                jnp.asarray(state.mean_field), self.env_spec
+                self._put(state.mean_field), self.env_spec
             )
             policy_best_response = np.asarray(policy_best_response)
-            current_stationary_mf = jnp.asarray(
+            current_stationary_mf = self._put(
                 self.env_spec.environment.stationary_mean_field
             )
             mean_field_br = mean_field_by_transition_kernel_multi_jax(
-                jnp.asarray(policy_best_response),
+                self._put(policy_best_response),
                 self.env_spec,
                 num_iterations=self.num_transition_steps,
                 initial_mean_field=current_stationary_mf,
@@ -149,14 +156,14 @@ class DampedFP_jax:
             self.env_spec.environment.stationary_mean_field = state.mean_field.copy()
 
             state.policy = policy_best_response
-            state_mf_jax = jnp.asarray(state.mean_field)
+            state_mf_jax = self._put(state.mean_field)
             if self.lambda_schedule == "fictitious_play" and len(policy_history) > 0:
                 average_policy = self._average_policies_weighted(
                     policy_history, mean_field_history
                 )
                 exploitability = float(
                     exploitability_jax(
-                        jnp.asarray(average_policy),
+                        self._put(average_policy),
                         self.env_spec,
                         initial_mean_field=state_mf_jax,
                     )
@@ -164,7 +171,7 @@ class DampedFP_jax:
             else:
                 exploitability = float(
                     exploitability_jax(
-                        jnp.asarray(state.policy),
+                        self._put(state.policy),
                         self.env_spec,
                         initial_mean_field=state_mf_jax,
                     )
@@ -180,9 +187,9 @@ class DampedFP_jax:
         )
         final_exploitability = float(
             exploitability_jax(
-                jnp.asarray(final_policy),
+                self._put(final_policy),
                 self.env_spec,
-                initial_mean_field=jnp.asarray(state.mean_field),
+                initial_mean_field=self._put(state.mean_field),
             )
         )
         log.info("Exploitability (returned policy): %s", final_exploitability)

@@ -1,6 +1,28 @@
 from abc import abstractmethod
+from concurrent.futures import ProcessPoolExecutor
+import os
 
 import numpy as np
+
+
+# ---------------------------------------------------------------------------
+# Module-level helpers – defined at module scope so ProcessPoolExecutor can
+# pickle them when spawning worker processes.
+# ---------------------------------------------------------------------------
+
+def _compute_transition_row(args):
+    """Compute T[s, :, :] for a single state s (worker helper)."""
+    env, s, mean_field, A, N = args
+    return [
+        [env.transition(mean_field=mean_field, state=s, action=a, noise=n) for n in range(N)]
+        for a in range(A)
+    ]
+
+
+def _compute_reward_row(args):
+    """Compute R[s, :] for a single state s (worker helper)."""
+    env, s, mean_field, A = args
+    return [env.reward(mean_field=mean_field, state=s, action=a) for a in range(A)]
 
 
 class MFGStationary:
@@ -82,31 +104,38 @@ class MFGStationary:
         pass
 
     def _build_transition_matrix(self, mean_field: np.ndarray) -> np.ndarray:
-        """Build T[s, a, n] -> next_state array for a given mean field."""
+        """Build T[s, a, n] -> next_state array for a given mean field.
+
+        Rows (per-state computations) are dispatched to a ``ProcessPoolExecutor``
+        so that independent states run in parallel on multiple CPU cores.
+        """
         S, A, N = self.N_states, self.N_actions, self.N_noises
-        return np.array(
-            [
-                [
-                    [
-                        self.transition(mean_field=mean_field, state=s, action=a, noise=n)
-                        for n in range(N)
-                    ]
-                    for a in range(A)
-                ]
-                for s in range(S)
-            ],
-            dtype=np.intp,
-        )
+        n_workers = min(os.cpu_count() or 1, S)
+        with ProcessPoolExecutor(max_workers=n_workers) as pool:
+            rows = list(
+                pool.map(
+                    _compute_transition_row,
+                    [(self, s, mean_field, A, N) for s in range(S)],
+                )
+            )
+        return np.array(rows, dtype=np.intp)
 
     def _build_reward_matrix(self, mean_field: np.ndarray) -> np.ndarray:
-        """Build R[s, a] array for a given mean field."""
+        """Build R[s, a] array for a given mean field.
+
+        Rows (per-state computations) are dispatched to a ``ProcessPoolExecutor``
+        so that independent states run in parallel on multiple CPU cores.
+        """
         S, A = self.N_states, self.N_actions
-        return np.array(
-            [
-                [self.reward(mean_field=mean_field, state=s, action=a) for a in range(A)]
-                for s in range(S)
-            ]
-        )
+        n_workers = min(os.cpu_count() or 1, S)
+        with ProcessPoolExecutor(max_workers=n_workers) as pool:
+            rows = list(
+                pool.map(
+                    _compute_reward_row,
+                    [(self, s, mean_field, A) for s in range(S)],
+                )
+            )
+        return np.array(rows)
 
     def mean_field_by_transition_kernel(
         self, policy: np.ndarray, num_transition_steps: int = 50
