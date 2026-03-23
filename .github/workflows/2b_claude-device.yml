@@ -1,0 +1,71 @@
+name: 🖥️ Claude Device & Parallelism
+
+on:
+  workflow_dispatch:
+
+jobs:
+  device:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install jax jaxlib torch
+          pip install -r requirements.txt || true
+
+      - name: Detect CUDA availability
+        id: cuda
+        run: |
+          python -c "import torch; print(torch.cuda.is_available())" | grep -q True \
+            && echo "available=true" >> $GITHUB_OUTPUT \
+            || echo "available=false" >> $GITHUB_OUTPUT
+
+      - name: Run Claude Device Agent
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          show_full_output: true
+          prompt: |
+            You are a performance engineer. CUDA available: ${{ steps.cuda.outputs.available }}
+
+            ## Task: CPU/GPU Portability & Parallelism
+            - All device placement must be driven by a config flag (`cfg.device = "cuda" | "cpu"`)
+            - PyTorch: use `.to(device)` consistently, never hardcode `.cuda()`
+            - JAX: use `jax.devices()` and `jax.device_put()` with explicit device
+            - CPU-bound loops over datasets → `multiprocessing.Pool` or `concurrent.futures`
+            - DataLoader pipelines → set `num_workers > 0`
+            - JAX multi-device → add `jax.pmap` where batch can be sharded
+
+            ## Report
+            Write `reports/device-report.md` before opening the PR:
+            ```markdown
+            # Device & Parallelism Report — <date>
+
+            ## What Was Done
+            - bullet list of every change made
+
+            ## Problems Encountered
+            - issues found and how they were resolved
+
+            ## Declarations
+            - hardcoded device references removed, parallelism patterns introduced
+            ```
+
+            ## Pull Request
+            - Branch: `perf/device-<YYYY-MM-DD>`
+            - PR title: "🖥️ perf: device portability and parallelism"
+            - PR body: paste the report summary

@@ -1,0 +1,65 @@
+name: 🧠 Claude Network Review
+
+on:
+  workflow_dispatch:
+
+jobs:
+  network:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install jax jaxlib torch pytest
+          pip install -r requirements.txt || true
+
+      - name: Run Claude Network Agent
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          show_full_output: true
+          prompt: |
+            You are a performance engineer specializing in neural networks.
+
+            ## Task: Network Architecture Review & Smoke Tests
+            Review every neural network definition in the codebase:
+            - Ensure layer dimensions are consistent end-to-end
+            - Remove redundant activations or unnecessary transposes
+            - Verify weight initialization (kaiming for ReLU, xavier for tanh)
+            - Confirm forward pass is differentiable and jit-compatible
+            - Run a forward + backward pass smoke test for each architecture
+            - Run `pytest tests/ -v` and fix any regressions
+
+            ## Report
+            Write `reports/network-report.md` before opening the PR:
+            ```markdown
+            # Network Review Report — <date>
+
+            ## What Was Done
+            - bullet list of every change made
+
+            ## Problems Encountered
+            - issues found and how they were resolved
+
+            ## Declarations
+            - architectures reviewed, smoke test results, regressions fixed
+            ```
+
+            ## Pull Request
+            - Branch: `perf/network-<YYYY-MM-DD>`
+            - PR title: "🧠 perf: network architecture review"
+            - PR body: paste the report summary

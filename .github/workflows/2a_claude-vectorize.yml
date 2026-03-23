@@ -1,0 +1,71 @@
+name: ⚡ Claude Vectorize & JIT
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_file:
+        description: 'Specific file to optimize (leave empty for full scan)'
+        required: false
+        default: ''
+
+jobs:
+  vectorize:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install jax jaxlib numpy
+          pip install -r requirements.txt || true
+
+      - name: Run Claude Vectorize Agent
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          show_full_output: true
+          prompt: |
+            You are a performance engineer. Target file: "${{ github.event.inputs.target_file || 'all files in /src/' }}"
+
+            ## Task: Vectorization & JAX/JIT
+            - Replace Python loops over arrays with NumPy or JAX vectorized ops
+            - Replace manual reductions (sum, max, mean) with NumPy equivalents
+            - Prefer `jnp` over `np` where JAX is already in the dependency tree
+            - Wrap pure-functional compute kernels with `@jax.jit`
+            - Use `jax.vmap` for per-sample operations instead of Python loops
+            - Use `jax.lax.scan` instead of Python for-loops over sequences
+            - Ensure no Python side-effects inside jitted functions
+
+            ## Report
+            Write `reports/vectorize-report.md` before opening the PR:
+            ```markdown
+            # Vectorization & JIT Report — <date>
+
+            ## What Was Done
+            - bullet list of every change made
+
+            ## Problems Encountered
+            - issues found and how they were resolved
+
+            ## Declarations
+            | File | Change | Estimated Speedup |
+            |------|--------|-------------------|
+            ```
+
+            ## Pull Request
+            - Branch: `perf/vectorize-<YYYY-MM-DD>`
+            - PR title: "⚡ perf: vectorization and JIT"
+            - PR body: paste the report summary
