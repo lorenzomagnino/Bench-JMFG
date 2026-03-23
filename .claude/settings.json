@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Write",
+      "Edit",
+      "Bash(git add:*)",
+      "Bash(git mv:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git checkout:*)",
+      "Bash(git branch:*)",
+      "Bash(mv:*)",
+      "Bash(touch:*)",
+      "Bash(mkdir:*)",
+      "Bash(pre-commit:*)",
+      "Bash(pytest:*)",
+      "Bash(ruff:*)",
+      "Bash(mypy:*)",
+      "Bash(gh pr create:*)"
+    ]
+  }
+}
