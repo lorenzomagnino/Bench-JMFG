@@ -67,11 +67,7 @@ Documentation = "https://bench-mfg.readthedocs.io/"
 mfg-train = "main:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["envs", "learner", "utility"]
-include = [
-    "args_parser.py",
-    "examples/*.py",
-]
+packages = ["src/envs", "src/learner", "src/utility", "src/conf"]
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
@@ -103,8 +99,8 @@ exclude = [
 line-length = 88
 indent-width = 4
 
-# Assume Python 3.8+
-target-version = "py38"
+# Assume Python 3.10+
+target-version = "py310"
 
 [tool.ruff.lint]
 # Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
@@ -143,3 +139,7 @@ line-ending = "auto"
 force-sort-within-sections = true
 # Combine multiple `from foo import a, b, c` statements with the same source
 combine-as-imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"

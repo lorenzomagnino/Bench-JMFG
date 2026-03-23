@@ -3,14 +3,18 @@ Main entry point for Bench-MFG experiments using Hydra for configuration managem
 """
 
 import logging
+from pathlib import Path
+import sys
+
+# Ensure src/ packages are importable when running directly (without pip install -e .)
+sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 logging.getLogger("jax._src.xla_bridge").setLevel(logging.WARNING)
 
-import hydra  # noqa: E402 we need to set the level of the JAX TPU backend warning to WARNING before importing JAX
-import numpy as np  # noqa: E402
-
 from conf.config_schema import MFGConfig  # noqa: E402
 from conf.config_utils import print_config_table  # noqa: E402
+import hydra  # noqa: E402 we need to set the level of the JAX TPU backend warning to WARNING before importing JAX
+import numpy as np  # noqa: E402
 from utility.create_environment import create_environment  # noqa: E402
 from utility.create_solver import create_solver  # noqa: E402
 from utility.plot_results import plot_results  # noqa: E402
@@ -24,7 +28,7 @@ from utility.wandb_logger import (  # noqa: E402
 log = logging.getLogger(__name__)
 
 
-@hydra.main(version_base=None, config_path="conf", config_name="defaults")
+@hydra.main(version_base=None, config_path="config", config_name="defaults")
 def main(cfg: MFGConfig) -> None:
     """Main execution function with Hydra configuration management."""
     print_config_table(cfg, style="table")

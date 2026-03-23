@@ -1,5 +1,5 @@
 # ── Stage 1: builder ──────────────────────────────────────────────────────────
-FROM python:3.11-slim AS builder
+FROM python:3.11.9-slim AS builder
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ RUN pip install --upgrade pip \
     && pip install --no-cache-dir -e ".[dev]"
 
 # ── Stage 2: runtime ──────────────────────────────────────────────────────────
-FROM python:3.11-slim AS runtime
+FROM python:3.11.9-slim AS runtime
 
 WORKDIR /app
 
@@ -25,11 +25,9 @@ WORKDIR /app
 COPY --from=builder /usr/local/lib/python3.11 /usr/local/lib/python3.11
 COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Copy source code
-COPY conf/ conf/
-COPY envs/ envs/
-COPY learner/ learner/
-COPY utility/ utility/
+# Copy source code and configuration
+COPY config/ config/
+COPY src/ src/
 COPY main.py .
 
 # Default: run the main training entry point
