@@ -41,4 +41,3 @@ initial_distribution:
   type: "uniform"     # uniform, concentrated, custom
   concentration_state: 0   # used only if type="concentrated"
   concentration_ratio: 0.8
-

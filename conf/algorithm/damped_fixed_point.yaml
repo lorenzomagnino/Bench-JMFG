@@ -15,4 +15,3 @@ dampedfp:
   #----- hyperparameters -----
   lambda_schedule: "fictitious_play"  # "pure" | "damped" | "fictitious_play"
   damped_constant: 0.2  # for "damped" variant
-

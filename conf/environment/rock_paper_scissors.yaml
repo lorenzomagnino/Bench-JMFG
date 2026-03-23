@@ -35,4 +35,3 @@ initial_distribution:
   type: "uniform"  # uniform, concentrated, custom
   concentration_state: 0  # Not used if type = "uniform"
   concentration_ratio: 0.8  # Not used if type = "uniform"
-

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import Optional
 
 
 @dataclass
@@ -21,9 +21,9 @@ class ColorsConfig:
 
     figure_background: str = "white"
 
-    policy2d_action_cmaps: Optional[List[str]] = field(
+    policy2d_action_cmaps: Optional[list[str]] = field(
         default_factory=lambda: ["Greens", "Purples", "Oranges", "Blues", "Greys"]
     )
-    policy2d_action_labels: Optional[List[str]] = field(
+    policy2d_action_labels: Optional[list[str]] = field(
         default_factory=lambda: ["up", "right", "down", "left", "stay"]
     )

@@ -2,7 +2,7 @@
 
 import contextlib
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 import matplotlib
 from matplotlib.figure import Figure
@@ -418,8 +418,8 @@ def plot_policy_from_npz(
     return_fig: bool = False,
     fn: Optional[Union[str, Path]] = None,
     colors: Optional[ColorsConfig] = None,
-    action_labels: Optional[List[str]] = None,
-    action_cmaps: Optional[List[str]] = None,
+    action_labels: Optional[list[str]] = None,
+    action_cmaps: Optional[list[str]] = None,
     outputs_dir: Union[str, Path] = "outputs",
     seed: int = 42,
     cmap: Optional[str] = None,
@@ -499,7 +499,7 @@ def plot_policy_from_npz(
 
 
 def plot_exploitability_mean_variance(
-    exploitabilities_list: List[np.ndarray],
+    exploitabilities_list: list[np.ndarray],
     xlabel: str = "Iteration",
     ylabel: str = "Exploitability",
     return_fig: bool = False,
@@ -590,20 +590,20 @@ def plot_exploitability_mean_variance(
 
 
 def plot_exploitability_groups(
-    exploitabilities_groups: List[List[np.ndarray]],
-    labels: Optional[List[str]] = None,
+    exploitabilities_groups: list[list[np.ndarray]],
+    labels: Optional[list[str]] = None,
     xlabel: str = "Iteration",
     ylabel: str = "Exploitability",
     return_fig: bool = False,
     fn: Optional[Union[str, Path]] = None,
     log_scale: bool = False,
     colors: Optional[ColorsConfig] = None,
-    color_list: Optional[List[str]] = None,
+    color_list: Optional[list[str]] = None,
     legend_loc: Optional[str] = None,
     show_legend: bool = True,
     plot_every_n: int = 1,
     marker: Optional[str] = None,
-    marker_list: Optional[List[str]] = None,
+    marker_list: Optional[list[str]] = None,
     ax: Optional[Any] = None,
 ) -> Optional[Figure]:
     """Plot mean and variance for multiple groups of exploitability vectors.
@@ -917,7 +917,7 @@ def plot_exploitability_groups(
 def group_exploitabilities_by_seed(
     environment: str,
     outputs_dir: Union[str, Path] = "outputs",
-) -> Dict[str, Dict[str, Any]]:
+) -> dict[str, dict[str, Any]]:
     """Group exploitabilities by seed for each algorithm version with hyperparameters.
 
     Given an environment, scans the outputs directory and groups exploitabilities
@@ -953,7 +953,7 @@ def group_exploitabilities_by_seed(
     if not env_dir.exists():
         raise FileNotFoundError(f"Environment directory not found: {env_dir}")
 
-    version_groups: Dict[str, Dict[str, List[np.ndarray]]] = {}
+    version_groups: dict[str, dict[str, list[np.ndarray]]] = {}
 
     for algorithm_dir in env_dir.iterdir():
         if not algorithm_dir.is_dir():
@@ -996,10 +996,10 @@ def group_exploitabilities_by_seed(
                             )
                             continue
 
-    result: Dict[str, Dict[str, Any]] = {}
+    result: dict[str, dict[str, Any]] = {}
     for version_name, seed_dict in version_groups.items():
         sorted_seeds = sorted(seed_dict.keys())
-        groups: List[List[np.ndarray]] = [seed_dict[seed] for seed in sorted_seeds]
+        groups: list[list[np.ndarray]] = [seed_dict[seed] for seed in sorted_seeds]
         result[version_name] = {
             "groups": groups,
             "seed_names": sorted_seeds,
@@ -1018,7 +1018,7 @@ def plot_exploitability_by_version_and_seed(
     fn: Optional[Union[str, Path]] = None,
     log_scale: bool = False,
     colors: Optional[ColorsConfig] = None,
-    color_list: Optional[List[str]] = None,
+    color_list: Optional[list[str]] = None,
 ) -> Optional[Figure]:
     """Plot exploitabilities grouped by seed for a specific algorithm version.
 
@@ -1052,14 +1052,14 @@ def plot_exploitability_by_version_and_seed(
         )
 
     version_data = all_groups[version_withhyper]
-    seed_groups: List[List[np.ndarray]] = version_data["groups"]
+    seed_groups: list[list[np.ndarray]] = version_data["groups"]
 
     if len(seed_groups) == 0:
         raise ValueError(
             f"No exploitability data found for version '{version_withhyper}'"
         )
 
-    all_exploitabilities: List[np.ndarray] = []
+    all_exploitabilities: list[np.ndarray] = []
     for seed_group in seed_groups:
         all_exploitabilities.extend(seed_group)
 
@@ -1089,7 +1089,7 @@ def plot_exploitability_by_version_and_seed(
 
 def plot_exploitability_multiple_versions(
     environment: str,
-    versions_withhyper: List[str],
+    versions_withhyper: list[str],
     outputs_dir: Union[str, Path] = "outputs",
     xlabel: str = "Iteration",
     ylabel: str = "Exploitability",
@@ -1097,7 +1097,7 @@ def plot_exploitability_multiple_versions(
     fn: Optional[Union[str, Path]] = None,
     log_scale: bool = False,
     colors: Optional[ColorsConfig] = None,
-    color_list: Optional[List[str]] = None,
+    color_list: Optional[list[str]] = None,
     cmap: Optional[Union[str, Any]] = None,
     legend_loc: Optional[str] = None,
     show_legend: bool = True,
@@ -1105,7 +1105,7 @@ def plot_exploitability_multiple_versions(
     best_version: Optional[str] = None,
     plot_every_n: int = 1,
     marker: Optional[str] = None,
-    marker_list: Optional[List[str]] = None,
+    marker_list: Optional[list[str]] = None,
 ) -> Optional[Figure]:
     """Plot exploitabilities for multiple algorithm versions on the same plot.
 
@@ -1146,10 +1146,10 @@ def plot_exploitability_multiple_versions(
 
     all_groups = group_exploitabilities_by_seed(environment, outputs_dir)
 
-    final_means: Dict[str, float] = {}
+    final_means: dict[str, float] = {}
 
-    exploitabilities_groups: List[List[np.ndarray]] = []
-    labels: List[str] = []
+    exploitabilities_groups: list[list[np.ndarray]] = []
+    labels: list[str] = []
 
     for version_withhyper in versions_withhyper:
         if version_withhyper not in all_groups:
@@ -1159,7 +1159,7 @@ def plot_exploitability_multiple_versions(
             )
 
         version_data = all_groups[version_withhyper]
-        seed_groups: List[List[np.ndarray]] = version_data["groups"]
+        seed_groups: list[list[np.ndarray]] = version_data["groups"]
 
         if len(seed_groups) == 0:
             print(
@@ -1167,7 +1167,7 @@ def plot_exploitability_multiple_versions(
             )
             continue
 
-        combined_exploitabilities: List[np.ndarray] = []
+        combined_exploitabilities: list[np.ndarray] = []
         for seed_group in seed_groups:
             combined_exploitabilities.extend(seed_group)
 
@@ -1288,7 +1288,7 @@ def get_versions_for_algorithm(
     environment: str,
     algorithm: str,
     outputs_dir: Union[str, Path] = "outputs",
-) -> List[str]:
+) -> list[str]:
     """Get all versions_withhyper for a specific algorithm and environment.
 
     Args:
@@ -1340,7 +1340,7 @@ def plot_exploitability_by_algorithm(
     fn: Optional[Union[str, Path]] = None,
     log_scale: bool = False,
     colors: Optional[ColorsConfig] = None,
-    color_list: Optional[List[str]] = None,
+    color_list: Optional[list[str]] = None,
     legend_loc: Optional[str] = None,
     show_legend: bool = True,
     plot_every_n: int = 1,
@@ -1402,12 +1402,12 @@ def plot_exploitability_by_algorithm(
             continue
 
         version_data = all_groups[version_withhyper]
-        seed_groups: List[List[np.ndarray]] = version_data["groups"]
+        seed_groups: list[list[np.ndarray]] = version_data["groups"]
 
         if len(seed_groups) == 0:
             continue
 
-        combined_exploitabilities: List[np.ndarray] = []
+        combined_exploitabilities: list[np.ndarray] = []
         for seed_group in seed_groups:
             combined_exploitabilities.extend(seed_group)
 
@@ -1719,9 +1719,9 @@ def get_four_rooms_walls(grid_dim: tuple) -> np.ndarray:
 
 def get_versions_for_comparison(
     environment: str,
-    fixed_versions: Optional[List[str]] = None,
+    fixed_versions: Optional[list[str]] = None,
     results_dir: Optional[Union[str, Path]] = None,
-) -> List[str]:
+) -> list[str]:
     """Get versions for comparison by combining fixed versions with best models from YAML files.
 
     Args:

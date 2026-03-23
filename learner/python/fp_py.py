@@ -1,10 +1,13 @@
 from dataclasses import dataclass
-from typing import Literal, Tuple
+import logging
+from typing import Literal
 
 import numpy as np
 from tqdm import tqdm
 
 from envs.mfg_model_class import MFGStationary
+
+log = logging.getLogger(__name__)
 
 LambdaSchedule = Literal["damped", "pure", "fictitious_play"]
 
@@ -77,7 +80,7 @@ class DampedFP_python:
         avg_policy = avg_policy / avg_policy.sum(axis=1, keepdims=True)
         return avg_policy
 
-    def initialize(self) -> Tuple[FPState, list]:
+    def initialize(self) -> tuple[FPState, list]:
         mu = self.model.mean_field_by_transition_kernel(
             self.initial_policy, num_transition_steps=self.num_transition_steps
         )
@@ -93,8 +96,8 @@ class DampedFP_python:
         state, exploitabilities = self.initialize()
         policy_history: list[np.ndarray] = [state.policy.copy()]
         mean_field_history: list[np.ndarray] = [state.mean_field.copy()]
-        print(f"Initial Exploitability: {exploitabilities[0]}")
-        print(f"Lambda Schedule: {self.lambda_schedule}")
+        log.info("Initial Exploitability: %s", exploitabilities[0])
+        log.info("Lambda Schedule: %s", self.lambda_schedule)
         if logger is not None:
             logger.log_iteration(0, exploitabilities[0], state.mean_field)
         for k in tqdm(range(1, self.num_iterations + 1), desc="Running"):
@@ -117,7 +120,6 @@ class DampedFP_python:
 
             state.policy = policy_best_response  # NOTE: lack of consistency? state = (policy_best_response, average_mean_field)
             if self.lambda_schedule == "fictitious_play" and len(policy_history) > 0:
-                # average_policy = self._average_policies_uniform(policy_history)
                 average_policy = self._average_policies_weighted(
                     policy_history, mean_field_history
                 )
@@ -134,5 +136,5 @@ class DampedFP_python:
             else state.policy
         )
         final_exploitability = self.model.exploitability(final_policy)
-        print(f"Exploitability (returned policy): {final_exploitability}")
+        log.info("Exploitability (returned policy): %s", final_exploitability)
         return final_policy, state.mean_field, exploitabilities

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Tuple
+import logging
 
 import jax.numpy as jnp
 import numpy as np
@@ -12,6 +12,8 @@ from envs.mfg_model_class_jit import (
     mean_field_by_transition_kernel_multi_jax,
 )
 from utility.policy_average import softmax_policy
+
+log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -44,7 +46,7 @@ class OMD_jax:
         self.early_stopping_enabled = early_stopping_enabled
         self.temperature = temperature
 
-    def initialize(self) -> Tuple[OMDComponents, list]:
+    def initialize(self) -> tuple[OMDComponents, list]:
         """
         Initialize Q-table components and other variables for OMD algorithm.
 
@@ -94,7 +96,7 @@ class OMD_jax:
         """
         omd_components, exploitabilities = self.initialize()
 
-        print(f"Initial Exploitability: {exploitabilities[0]}")
+        log.info("Initial Exploitability: %s", exploitabilities[0])
         if logger is not None:
             logger.log_iteration(0, exploitabilities[0], omd_components.mean_field)
 
@@ -144,7 +146,7 @@ class OMD_jax:
                     iteration, exploitability, omd_components.mean_field
                 )
 
-        print(f"FINAL OMD EXPLOITABILITY: {exploitabilities[-1]}")
+        log.info("Final OMD exploitability: %s", exploitabilities[-1])
 
         return (
             omd_components.policy,

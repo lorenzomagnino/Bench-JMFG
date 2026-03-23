@@ -1,7 +1,9 @@
 """Run the training process."""
 
-from conf.config_schema import AlgorithmConfig, MFGConfig
+from conf.config_schema import MFGConfig
 from utility.wandb_logger import WandbLogger
+
+_KNOWN_TARGETS = {"DampedFP", "PSO", "OMD", "PI"}
 
 
 def run_training(solver, cfg: MFGConfig, logger=None):
@@ -18,14 +20,9 @@ def run_training(solver, cfg: MFGConfig, logger=None):
     if logger is None and cfg.logging.wandb_enabled:
         logger = WandbLogger(cfg)
 
-    algo_cfg: AlgorithmConfig = cfg.algorithm
-    algo_target = algo_cfg._target_
-    if (
-        algo_target == "DampedFP"
-        or algo_target == "PSO"
-        or algo_target == "OMD"
-        or algo_target == "PI"
-    ):
-        optimal_policy, mean_field, exploitabilities = solver.eval(logger=logger)
+    algo_target = cfg.algorithm._target_
+    if algo_target not in _KNOWN_TARGETS:
+        raise ValueError(f"Unknown algorithm target: {algo_target!r}")
 
+    optimal_policy, mean_field, exploitabilities = solver.eval(logger=logger)
     return optimal_policy, mean_field, exploitabilities, logger

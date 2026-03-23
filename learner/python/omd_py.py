@@ -1,11 +1,13 @@
 from dataclasses import dataclass
-from typing import Tuple
+import logging
 
 import numpy as np
 from tqdm import tqdm
 
 from envs.mfg_model_class import MFGStationary
 from utility.policy_average import softmax_policy
+
+log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -38,7 +40,7 @@ class OMD_python:
         self.early_stopping_enabled = early_stopping_enabled
         self.temperature = temperature
 
-    def initialize(self) -> Tuple[OMDComponents, list]:
+    def initialize(self) -> tuple[OMDComponents, list]:
         """
         Initialize Q-table components and other variables for OMD algorithm.
 
@@ -75,7 +77,7 @@ class OMD_python:
         """
         omd_components, exploitabilities = self.initialize()
 
-        print(f"Initial Exploitability: {exploitabilities[0]}")
+        log.info("Initial Exploitability: %s", exploitabilities[0])
         if logger is not None:
             logger.log_iteration(0, exploitabilities[0], omd_components.mean_field)
 
@@ -108,7 +110,7 @@ class OMD_python:
                     iteration, exploitability, omd_components.mean_field
                 )
 
-        print(f"FINAL OMD EXPLOITABILITY: {exploitabilities[-1]}")
+        log.info("Final OMD exploitability: %s", exploitabilities[-1])
 
         return (
             omd_components.policy,

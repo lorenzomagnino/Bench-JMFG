@@ -39,4 +39,3 @@ initial_distribution:
   type: "uniform"  # uniform, concentrated, custom
   concentration_state: 0  # Start with agents in Susceptible state
   concentration_ratio: 0.95  # 95% susceptible, 5% infected initially
-

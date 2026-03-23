@@ -30,5 +30,3 @@ initial_distribution:
   type: "uniform"  # uniform, concentrated, custom
   concentration_state: 5  # State where agents concentrate (if type = "concentrated")
   concentration_ratio: 0.8  # Fraction of agents at concentration_state
-
-

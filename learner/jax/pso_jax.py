@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import logging
-from typing import Optional, Tuple
+from typing import Optional
 
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
@@ -13,6 +13,8 @@ from envs.mfg_model_class_jit import (
     exploitability_jax,
     mean_field_by_transition_kernel_multi_jax,
 )
+
+log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -218,7 +220,7 @@ class PSO_jax:
         self,
         verbose=False,
         logger=None,
-    ) -> Tuple:
+    ) -> tuple:
         """
         Running PSO.
         Return:  best_policy, MF(best_policy), [all the exploitabiities at each iteration]
@@ -281,7 +283,9 @@ class PSO_jax:
             if logger is not None:
                 logger.log_iteration(i, pso_components.swarm_best_value, mean_field)
 
-        print(f"Exploitability with PSO algorithm : {pso_components.swarm_best_value}")
+        log.info(
+            "Exploitability with PSO algorithm: %s", pso_components.swarm_best_value
+        )
         return (
             best_policy,
             mean_field,
@@ -322,7 +326,7 @@ def shuffle_particles(
 ) -> PSOEvalComponents:
     num_particles, dim = pso_components.positions.shape
     if np.random.rand() < shuffle_probability:
-        print("Performing rebirth")
+        log.info("Performing rebirth")
         distances = np.abs(
             pso_components.best_values_by_particles - pso_components.swarm_best_value
         )
@@ -365,9 +369,9 @@ def update(
     pso_components.best_positions[improved_indices] = pso_components.positions[
         improved_indices
     ]
-    pso_components.best_values_by_particles[
-        improved_indices
-    ] = pso_components.best_values_by_particles[improved_indices]
+    pso_components.best_values_by_particles[improved_indices] = (
+        pso_components.best_values_by_particles[improved_indices]
+    )
     iteration_best_fitness = np.min(pso_components.best_values_by_particles)
     if iteration_best_fitness < pso_components.swarm_best_value:
         pso_components.swarm_best_position = pso_components.best_positions[
@@ -381,8 +385,12 @@ def update(
 
 def print_to_console(verbose_bool, i, swarm_best_fitness, num_iterations):
     if verbose_bool:
-        output = "Iteration  {ci}  out of  {mi} , best (min) exploitability:  {sbf}."
-        print(output.format(ci=i + 1, mi=num_iterations, sbf=swarm_best_fitness))
+        log.info(
+            "Iteration %d out of %d, best (min) exploitability: %s.",
+            i + 1,
+            num_iterations,
+            swarm_best_fitness,
+        )
 
 
 def policy_to_logits(policy: np.ndarray, temperature: float) -> np.ndarray:

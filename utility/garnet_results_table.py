@@ -1,7 +1,7 @@
 """Utility to retrieve and display final exploitability results from Garnet experiments."""
 
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -62,7 +62,7 @@ def collect_final_exploitabilities(
     garnet_version_dir: Path,
     algorithm: str,
     num_instances: int = 10,
-) -> List[float]:
+) -> list[float]:
     """Collect final exploitability values across all instances for a given algorithm.
 
     Args:
@@ -95,7 +95,7 @@ def collect_final_exploitabilities(
     return final_values
 
 
-def compute_mean_std(values: List[float]) -> Tuple[Optional[float], Optional[float]]:
+def compute_mean_std(values: list[float]) -> tuple[Optional[float], Optional[float]]:
     """Compute mean and standard deviation of a list of values.
 
     Args:
@@ -133,7 +133,7 @@ def format_cell(mean: Optional[float], std: Optional[float]) -> str:
 
 
 def generate_garnet_results_table(
-    algorithms: Optional[Dict[str, bool]] = None,
+    algorithms: Optional[dict[str, bool]] = None,
     outputs_dir: Union[str, Path] = "outputs",
     num_instances: int = 10,
     save_csv: Optional[Union[str, Path]] = None,
