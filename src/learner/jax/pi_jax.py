@@ -20,7 +20,7 @@ from envs.mfg_model_class_jit import (
 import jax
 import numpy as np
 from tqdm import tqdm
-from utility.policy_average import greedy_policy, softmax_policy
+from utility.policy_average import greedy_policy_jax, softmax_policy_jax
 
 log = logging.getLogger(__name__)
 
@@ -31,9 +31,9 @@ PIVariant = Literal[
 
 @dataclass
 class PIComponents:
-    policy: np.ndarray
-    mean_field: np.ndarray
-    q_values: np.ndarray
+    policy: jax.Array
+    mean_field: jax.Array
+    q_values: jax.Array
 
 
 class PI_jax:
@@ -109,25 +109,23 @@ class PI_jax:
 
     def initialize(self) -> tuple[PIComponents, list]:
         """Initialize policy iteration components."""
-        initial_policy = self.initial_policy
+        initial_policy = self._put(self.initial_policy)
         current_stationary_mf = self._put(
             self.env_spec.environment.stationary_mean_field
         )
         initial_mean_field = mean_field_by_transition_kernel_multi_jax(
-            self._put(initial_policy),
+            initial_policy,
             self.env_spec,
             num_iterations=20,
             initial_mean_field=current_stationary_mf,
         )
-        initial_mean_field = np.asarray(initial_mean_field)
-        self.env_spec.environment.stationary_mean_field = initial_mean_field.copy()
+        initial_mean_field_host = np.asarray(initial_mean_field)
+        self.env_spec.environment.stationary_mean_field = initial_mean_field_host.copy()
 
-        initial_q_values = np.asarray(
-            Q_eval_jax(
-                self._put(initial_policy),
-                self._put(initial_mean_field),
-                self.env_spec,
-            )
+        initial_q_values = Q_eval_jax(
+            initial_policy,
+            initial_mean_field,
+            self.env_spec,
         )
 
         pi_components = PIComponents(
@@ -138,9 +136,9 @@ class PI_jax:
 
         exploitability = float(
             exploitability_jax(
-                self._put(initial_policy),
+                initial_policy,
                 self.env_spec,
-                initial_mean_field=self._put(initial_mean_field),
+                initial_mean_field=initial_mean_field,
             )
         )
         exploitabilities = [exploitability]
@@ -163,23 +161,23 @@ class PI_jax:
             log.info("Temperature: %s", self.temperature)
 
         if logger is not None:
-            logger.log_iteration(0, exploitabilities[0], pi_components.mean_field)
+            logger.log_iteration(
+                0, exploitabilities[0], np.asarray(pi_components.mean_field)
+            )
 
         for iteration in tqdm(
             range(1, self.num_iterations + 1),
             desc=f"Running PI ({self.variant})",
         ):
-            pi_components.q_values = np.asarray(
-                Q_eval_jax(
-                    self._put(pi_components.policy),
-                    self._put(pi_components.mean_field),
-                    self.env_spec,
-                )
+            pi_components.q_values = Q_eval_jax(
+                pi_components.policy,
+                pi_components.mean_field,
+                self.env_spec,
             )
             if self.variant in ("policy_iteration", "smooth_policy_iteration"):
-                pi_components.policy = greedy_policy(pi_components.q_values)
+                pi_components.policy = greedy_policy_jax(pi_components.q_values)
             elif self.variant == "boltzmann_policy_iteration":
-                pi_components.policy = softmax_policy(
+                pi_components.policy = softmax_policy_jax(
                     pi_components.q_values, self.temperature
                 )
 
@@ -187,12 +185,11 @@ class PI_jax:
                 self.env_spec.environment.stationary_mean_field
             )
             new_mean_field = mean_field_by_transition_kernel_multi_jax(
-                self._put(pi_components.policy),
+                pi_components.policy,
                 self.env_spec,
                 num_iterations=20,
                 initial_mean_field=current_stationary_mf,
             )
-            new_mean_field = np.asarray(new_mean_field)
 
             if self.variant == "smooth_policy_iteration":
                 if self.damped_constant is None:
@@ -208,22 +205,22 @@ class PI_jax:
             else:
                 pi_components.mean_field = new_mean_field
 
-            self.env_spec.environment.stationary_mean_field = (
-                pi_components.mean_field.copy()
+            self.env_spec.environment.stationary_mean_field = np.asarray(
+                pi_components.mean_field
             )
 
             exploitability = float(
                 exploitability_jax(
-                    self._put(pi_components.policy),
+                    pi_components.policy,
                     self.env_spec,
-                    initial_mean_field=self._put(pi_components.mean_field),
+                    initial_mean_field=pi_components.mean_field,
                 )
             )
             exploitabilities.append(exploitability)
 
             if logger is not None:
                 logger.log_iteration(
-                    iteration, exploitability, pi_components.mean_field
+                    iteration, exploitability, np.asarray(pi_components.mean_field)
                 )
 
             if exploitability < 1e-6 and self.early_stopping_enabled:
@@ -233,7 +230,7 @@ class PI_jax:
         log.info("Final Exploitability: %s", exploitabilities[-1])
 
         return (
-            pi_components.policy,
-            pi_components.mean_field,
+            np.asarray(pi_components.policy),
+            np.asarray(pi_components.mean_field),
             exploitabilities,
         )
