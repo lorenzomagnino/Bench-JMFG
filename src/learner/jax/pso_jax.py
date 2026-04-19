@@ -120,32 +120,23 @@ class PSO_jax:
         Returns:
         - Array of shape (num_particles,) containing exploitability for each particle
         """
-        logits_batch = positions.reshape(
-            self.num_particles,
-            self.env_spec.environment.N_states,
-            self.env_spec.environment.N_actions,
+        logits_batch = self._put(
+            positions.reshape(
+                self.num_particles,
+                self.env_spec.environment.N_states,
+                self.env_spec.environment.N_actions,
+            )
         )
 
         if self.policy_type == "mellowmax":
-            # Vectorized mellowmax over the particle batch dimension
-            omega = 16.55
-            N_actions = self.env_spec.environment.N_actions
-            c = np.max(logits_batch, axis=-1, keepdims=True)
-            exp_logits = np.exp(omega * (logits_batch - c))
-            log_sum_exp = np.log(np.sum(exp_logits, axis=-1, keepdims=True) / N_actions)
-            mellowmax_vals = c + log_sum_exp / omega
-            policies_batch = np.exp(omega * (logits_batch - mellowmax_vals))
+            policies_batch = mellowmax_jax(logits_batch)
         else:
-            logits_max = np.max(logits_batch, axis=-1, keepdims=True)
-            logits_stable = logits_batch - logits_max
-            logits_scaled = logits_stable / self.temperature
-            exp_logits = np.exp(logits_scaled)
-            policies_batch = exp_logits / np.sum(exp_logits, axis=-1, keepdims=True)
+            policies_batch = jax.nn.softmax(logits_batch / self.temperature, axis=-1)
 
         initial_mf = self._put(self.env_spec.environment.stationary_mean_field)
 
         exploitabilities = exploitability_batch_pmap(
-            self._put(policies_batch),
+            policies_batch,
             self.env_spec,
             initial_mf,
             self.num_particles,
@@ -442,6 +433,16 @@ def mellowmax(logits: np.ndarray, N_actions: int, omega: float = 16.55) -> np.nd
     )  # Broadcast mellowmax_vals
 
     return mellowmax_probs
+
+
+def mellowmax_jax(logits: jax.Array, omega: float = 16.55) -> jax.Array:
+    """JAX mellowmax policy transform for batched logits."""
+    n_actions = logits.shape[-1]
+    c = jnp.max(logits, axis=-1, keepdims=True)
+    exp_logits = jnp.exp(omega * (logits - c))
+    log_sum_exp = jnp.log(jnp.sum(exp_logits, axis=-1, keepdims=True) / n_actions)
+    mellowmax_vals = c + (log_sum_exp / omega)
+    return jnp.exp(omega * (logits - mellowmax_vals))
 
 
 def boltzmann_policy(logits: np.ndarray, temperature: float) -> np.ndarray:
