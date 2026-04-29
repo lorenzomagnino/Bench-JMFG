@@ -2,6 +2,35 @@
 
 This directory contains scripts for running and aggregating MF-Garnet experiments.
 
+## MF-Garnet Game Generation
+
+A **MF-Garnet** (Mean-Field GARNET) game is a randomly generated Mean Field Game (MFG) instance. Each run uses a different `seed` to produce a distinct game. Here's the construction pipeline in `src/envs/mf_garnet/mf_garnet.py`:
+
+### 1. Randomize coupling coefficients
+From the seed, four coupling scalars are drawn from `Uniform[0,1]`:
+- `cp`, `rho_p` — control how strongly the mean field influences **transitions**
+- `cr`, `rho_r` — control how strongly the mean field influences **rewards**
+
+### 2. Build the base transition kernel `P0` (sparse)
+For each `(state, action)` pair, `branching_factor` (default: 5) next-states are sampled at random, and a probability vector over them is sampled from a **Dirichlet distribution**. This creates a sparse but randomized transition kernel.
+
+### 3. Build the mean-field coupling tensor `C`
+A tensor `C[s, a, :, :]` of shape `(N_states, N_actions, N_states, N_states)` is drawn from a **standard normal**. It modulates how the mean-field distribution `mu` bends transitions.
+
+At runtime, the actual transition is:
+- **Additive**: `intensity = cp * P0(s,a) + rho_p * (C[s,a] @ mu)`
+- **Multiplicative**: `intensity = P0(s,a) * (cp + rho_p * (C[s,a] @ mu))`
+
+then normalized to a valid probability.
+
+### 4. Build the base reward `R0` and interaction matrix `M`
+- `R0[s,a]` is drawn from `Normal(0, reward_scale)`
+- `M[s,y]` is drawn from a normal matrix, then symmetrized (`potential` game) or anti-symmetrized (`cyclic` game)
+
+The actual reward is:
+- **Additive**: `cr * R0[s,a] + rho_r * (M[s] @ mu)`
+- **Multiplicative**: `R0[s,a] * (cr + rho_r * (M[s] @ mu))`
+
 ## Overview
 
 The MF-Garnet experiments follow this protocol:
