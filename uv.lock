@@ -176,6 +176,70 @@ wheels = [
 ]
 
 [[package]]
+name = "bench-mfg"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "cma" },
+    { name = "colorlog" },
+    { name = "hydra-core" },
+    { name = "jax", version = "0.6.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "jax", version = "0.7.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "matplotlib" },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "robo-goggles", extra = ["jax", "wandb"] },
+    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "scipy", version = "1.16.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "tqdm" },
+    { name = "wandb" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "black" },
+    { name = "pre-commit" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "ruff" },
+]
+docs = [
+    { name = "sphinx", version = "8.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "sphinx", version = "8.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "sphinx-rtd-theme" },
+]
+jupyter = [
+    { name = "ipykernel" },
+    { name = "ipywidgets" },
+    { name = "jupyter" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "black", marker = "extra == 'dev'", specifier = ">=22.0.0" },
+    { name = "cma", specifier = ">=3.2.0" },
+    { name = "colorlog", specifier = ">=6.6.0" },
+    { name = "hydra-core", specifier = ">=1.3.0" },
+    { name = "ipykernel", marker = "extra == 'jupyter'", specifier = ">=6.0.0" },
+    { name = "ipywidgets", marker = "extra == 'jupyter'", specifier = ">=8.0.0" },
+    { name = "jax", specifier = ">=0.4.13" },
+    { name = "jupyter", marker = "extra == 'jupyter'", specifier = ">=1.0.0" },
+    { name = "matplotlib", specifier = ">=3.5.0" },
+    { name = "numpy", specifier = ">=1.21.0" },
+    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=2.20.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.0.0" },
+    { name = "robo-goggles", extras = ["jax", "wandb"], specifier = ">=0.1.8" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
+    { name = "scipy", specifier = ">=1.7.0" },
+    { name = "sphinx", marker = "extra == 'docs'", specifier = ">=5.0.0" },
+    { name = "sphinx-rtd-theme", marker = "extra == 'docs'", specifier = ">=1.0.0" },
+    { name = "tqdm", specifier = ">=4.62.0" },
+    { name = "wandb", specifier = ">=0.23.0" },
+]
+provides-extras = ["dev", "docs", "jupyter"]
+
+[[package]]
 name = "black"
 version = "25.9.0"
 source = { registry = "https://pypi.org/simple" }
@@ -4179,67 +4243,3 @@ sdist = { url = "https://files.pythonhosted.org/packages/58/2b/58b3db8814e39277d
 wheels = [
     { url = "https://files.pythonhosted.org/packages/5b/8f/447cc9cb57456d786204af0f450ffb920039104c5eff6626337c9f403bd1/xyzservices-2025.10.0-py3-none-any.whl", hash = "sha256:cfd6423367c7bc717ed5824d4dd7de2c91486886c1c193db9d8f0fa7fd43bc1b", size = 92737, upload-time = "2025-10-30T14:46:34.923Z" },
 ]
-
-[[package]]
-name = "zero-order-mfg"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "cma" },
-    { name = "colorlog" },
-    { name = "hydra-core" },
-    { name = "jax", version = "0.6.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "jax", version = "0.7.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "matplotlib" },
-    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "numpy", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "robo-goggles", extra = ["jax", "wandb"] },
-    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "scipy", version = "1.16.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "tqdm" },
-    { name = "wandb" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "black" },
-    { name = "pre-commit" },
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "ruff" },
-]
-docs = [
-    { name = "sphinx", version = "8.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "sphinx", version = "8.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "sphinx-rtd-theme" },
-]
-jupyter = [
-    { name = "ipykernel" },
-    { name = "ipywidgets" },
-    { name = "jupyter" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "black", marker = "extra == 'dev'", specifier = ">=22.0.0" },
-    { name = "cma", specifier = ">=3.2.0" },
-    { name = "colorlog", specifier = ">=6.6.0" },
-    { name = "hydra-core", specifier = ">=1.3.0" },
-    { name = "ipykernel", marker = "extra == 'jupyter'", specifier = ">=6.0.0" },
-    { name = "ipywidgets", marker = "extra == 'jupyter'", specifier = ">=8.0.0" },
-    { name = "jax", specifier = ">=0.4.13" },
-    { name = "jupyter", marker = "extra == 'jupyter'", specifier = ">=1.0.0" },
-    { name = "matplotlib", specifier = ">=3.5.0" },
-    { name = "numpy", specifier = ">=1.21.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=2.20.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.0.0" },
-    { name = "robo-goggles", extras = ["jax", "wandb"], specifier = ">=0.1.8" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
-    { name = "scipy", specifier = ">=1.7.0" },
-    { name = "sphinx", marker = "extra == 'docs'", specifier = ">=5.0.0" },
-    { name = "sphinx-rtd-theme", marker = "extra == 'docs'", specifier = ">=1.0.0" },
-    { name = "tqdm", specifier = ">=4.62.0" },
-    { name = "wandb", specifier = ">=0.23.0" },
-]
-provides-extras = ["dev", "docs", "jupyter"]
