@@ -291,8 +291,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--plot-every-n",
         type=int,
-        default=1,
-        help="Subsample: plot every N-th iteration (default: 1 = all)",
+        default=10,
+        help="Subsample: plot every N-th iteration (default: 10)",
     )
     args = parser.parse_args()
 

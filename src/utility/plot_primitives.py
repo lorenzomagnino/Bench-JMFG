@@ -88,6 +88,8 @@ def plot_exploitability(
     fn: str | Path | None = None,
     log_scale: bool = False,
     colors: ColorsConfig | None = None,
+    plot_every_n: int = 10,
+    marker: str = "o",
 ) -> Figure | None:
     """Plot a single exploitability trajectory."""
     exploitabilities = np.array(exploitabilities)
@@ -100,13 +102,42 @@ def plot_exploitability(
         colors = ColorsConfig()
 
     iterations = np.arange(len(exploitabilities))
-    fig, ax = plt.subplots(1, 1, figsize=(8, 5))
+
+    if plot_every_n > 1:
+        indices = np.arange(0, len(iterations), plot_every_n)
+        if len(indices) == 0 or indices[-1] != len(iterations) - 1:
+            indices = np.append(indices, len(iterations) - 1)
+        iterations_plot = iterations[indices]
+        exp_plot = exploitabilities[indices]
+        marker_size = 5
+    else:
+        iterations_plot = iterations
+        exp_plot = exploitabilities
+        marker_size = 0
+
+    fig, ax = plt.subplots(1, 1, figsize=(5, 4))
     fig.patch.set_facecolor(colors.figure_background)
 
-    ax.plot(iterations, exploitabilities, linewidth=2, color="blue", alpha=0.8)
-    ax.set_xlabel(xlabel, fontsize=12)
-    ax.set_ylabel(ylabel, fontsize=12)
+    ax.plot(
+        iterations_plot,
+        exp_plot,
+        linewidth=2,
+        color="blue",
+        alpha=0.8,
+        marker=marker,
+        markersize=marker_size,
+    )
+    ax.set_xlabel(xlabel, fontsize=14)
+    ax.set_ylabel(ylabel, fontsize=14)
+    ax.tick_params(axis="both", labelsize=12)
     ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.6)
+
+    max_iter = len(iterations) - 1
+    step = 50 if max_iter >= 100 else (25 if max_iter >= 50 else 10)
+    x_ticks = np.arange(0, max_iter + 1, step)
+    if len(x_ticks) == 0 or x_ticks[-1] != max_iter:
+        x_ticks = np.append(x_ticks, max_iter)
+    ax.set_xticks(x_ticks)
 
     if log_scale:
         ax.set_yscale("log")
@@ -128,6 +159,8 @@ def plot_exploitability_from_npz(
     fn: str | Path | None = None,
     log_scale: bool = False,
     colors: ColorsConfig | None = None,
+    plot_every_n: int = 10,
+    marker: str = "o",
 ) -> Figure | None:
     """Load exploitabilities from NPZ and plot them.
 
@@ -149,6 +182,8 @@ def plot_exploitability_from_npz(
         fn=fn,
         log_scale=log_scale,
         colors=colors,
+        plot_every_n=plot_every_n,
+        marker=marker,
     )
 
 
@@ -286,6 +321,8 @@ def plot_exploitability_mean_variance(
     log_scale: bool = False,
     colors: ColorsConfig | None = None,
     label: str | None = None,
+    plot_every_n: int = 10,
+    marker: str = "o",
 ) -> Figure | None:
     """Plot mean ± std over multiple exploitability trajectories."""
     if len(exploitabilities_list) == 0:
@@ -304,17 +341,53 @@ def plot_exploitability_mean_variance(
         colors = ColorsConfig()
 
     iterations = np.arange(len(mean_exp))
-    fig, ax = plt.subplots(1, 1, figsize=(8, 5))
+
+    if plot_every_n > 1:
+        indices = np.arange(0, len(iterations), plot_every_n)
+        if len(indices) == 0 or indices[-1] != len(iterations) - 1:
+            indices = np.append(indices, len(iterations) - 1)
+        iterations_plot = iterations[indices]
+        mean_plot = mean_exp[indices]
+        std_plot = std_exp[indices]
+        marker_size = 5
+    else:
+        iterations_plot = iterations
+        mean_plot = mean_exp
+        std_plot = std_exp
+        marker_size = 0
+
+    fig, ax = plt.subplots(1, 1, figsize=(5, 4))
     fig.patch.set_facecolor(colors.figure_background)
 
-    ax.plot(iterations, mean_exp, linewidth=2, color="blue", alpha=0.8, label=label)
+    ax.plot(
+        iterations_plot,
+        mean_plot,
+        linewidth=2,
+        color="blue",
+        alpha=0.8,
+        label=label,
+        marker=marker,
+        markersize=marker_size,
+    )
     ax.fill_between(
-        iterations, mean_exp - std_exp, mean_exp + std_exp, alpha=0.3, color="blue"
+        iterations_plot,
+        mean_plot - std_plot,
+        mean_plot + std_plot,
+        alpha=0.3,
+        color="blue",
     )
 
-    ax.set_xlabel(xlabel, fontsize=12)
-    ax.set_ylabel(ylabel, fontsize=12)
+    ax.set_xlabel(xlabel, fontsize=14)
+    ax.set_ylabel(ylabel, fontsize=14)
+    ax.tick_params(axis="both", labelsize=12)
     ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.6)
+
+    max_iter = len(iterations) - 1
+    step = 50 if max_iter >= 100 else (25 if max_iter >= 50 else 10)
+    x_ticks = np.arange(0, max_iter + 1, step)
+    if len(x_ticks) == 0 or x_ticks[-1] != max_iter:
+        x_ticks = np.append(x_ticks, max_iter)
+    ax.set_xticks(x_ticks)
 
     if log_scale:
         ax.set_yscale("log")
@@ -396,13 +469,13 @@ def plot_exploitability_groups(
     external_ax = ax is not None
     if ax is None:
         if num_groups > 20:
-            figsize = (18, 13)
+            figsize = (14, 10)
         elif num_groups > 10:
-            figsize = (18, 18)
+            figsize = (14, 12)
         elif num_groups > 5:
-            figsize = (13, 9)
+            figsize = (10, 7)
         else:
-            figsize = (12, 8)
+            figsize = (9, 6)
         fig, ax = plt.subplots(1, 1, figsize=figsize)
         fig.patch.set_facecolor(colors.figure_background)
     else:
@@ -486,7 +559,8 @@ def plot_exploitability_groups(
     if max_iteration == 149:
         max_iteration = 150
 
-    x_ticks = np.arange(0, max_iteration + 1, 30)
+    tick_step = 50 if max_iteration >= 100 else (25 if max_iteration >= 50 else 10)
+    x_ticks = np.arange(0, max_iteration + 1, tick_step)
     if len(x_ticks) == 0 or x_ticks[-1] != max_iteration:
         x_ticks = np.append(x_ticks, max_iteration)
     ax.set_xticks(x_ticks)
@@ -823,10 +897,10 @@ def plot_runtime_bar(
 
     ax.set_xscale("log")
     ax.set_yticks(range(1, n + 1))
-    ax.set_yticklabels(labels, fontsize=10)
-    ax.set_xlabel("Wall-clock runtime (s)", fontsize=11)
+    ax.set_yticklabels(labels, fontsize=13)
+    ax.set_xlabel("Wall-clock runtime (s)", fontsize=13)
     ax.grid(True, axis="x", linestyle="--", linewidth=0.4, alpha=0.5)
-    ax.tick_params(axis="x", labelsize=9)
+    ax.tick_params(axis="x", labelsize=11)
     ax.invert_yaxis()
 
     plt.tight_layout()
