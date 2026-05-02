@@ -15,9 +15,15 @@ logging.getLogger("jax._src.xla_bridge").setLevel(logging.WARNING)
 from conf.config_schema import MFGConfig  # noqa: E402
 from conf.config_utils import print_config_table  # noqa: E402
 import hydra  # noqa: E402 we need to set the level of the JAX TPU backend warning to WARNING before importing JAX
+from hydra.core.hydra_config import HydraConfig  # noqa: E402
+from hydra.types import RunMode  # noqa: E402
 import numpy as np  # noqa: E402
 from utility.create_environment import create_environment  # noqa: E402
 from utility.create_solver import create_solver  # noqa: E402
+from utility.path_utils import (  # noqa: E402
+    get_algorithm_name_with_variant,
+    get_output_directory,
+)
 from utility.plot_results import plot_results  # noqa: E402
 from utility.run_training import run_training  # noqa: E402
 from utility.save_results import save_results  # noqa: E402
@@ -87,6 +93,42 @@ def train_model(
 
     if logger is not None:
         logger.finish()
+
+    if run_id is not None:
+        _print_plot_commands(cfg, run_id)
+
+
+def _print_plot_commands(cfg: MFGConfig, run_id: str) -> None:
+    """Print the exact command to visualise the saved results of this run."""
+    try:
+        is_sweep = HydraConfig.get().mode == RunMode.MULTIRUN
+    except Exception:
+        is_sweep = False
+
+    sep = "-" * 64
+
+    if is_sweep:
+        env_name = cfg.environment.name
+        algo_dir = get_algorithm_name_with_variant(cfg)
+        print(
+            f"\n{sep}\n"
+            f"Plot sweep results:\n"
+            f"  PYTHONPATH=src python -m utility.plot_sweep {env_name} {algo_dir}\n"
+            f"{sep}\n"
+        )
+    else:
+        run_dir = Path(get_output_directory(cfg)) / run_id
+        is_grid = cfg.environment.grid.is_grid
+        grid_flags = ""
+        if is_grid:
+            rows, cols = cfg.environment.grid.dimension
+            grid_flags = f" --is-grid --grid-rows {rows} --grid-cols {cols}"
+        print(
+            f"\n{sep}\n"
+            f"Plot this run:\n"
+            f"  PYTHONPATH=src python -m utility.plot_single_run {run_dir}{grid_flags}\n"
+            f"{sep}\n"
+        )
 
 
 if __name__ == "__main__":
