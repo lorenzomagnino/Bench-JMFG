@@ -40,7 +40,7 @@ def main(cfg: MFGConfig) -> None:
     """Main execution function with Hydra configuration management."""
     print_config_table(cfg, style="tree")
     np.random.seed(cfg.experiment.random_seed)
-    log.info("using DEVICE: ", cfg.device)
+    log.info("Using DEVICE: %s", cfg.device)
     environment, initial_policy = create_environment(cfg)
 
     initial_mean_field = environment.mean_field_by_transition_kernel(
