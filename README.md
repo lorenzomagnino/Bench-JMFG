@@ -134,9 +134,61 @@ Bench-MFG/
 
 ## Outputs
 
-Results are written to `outputs/YYYY-MM-DD/<Env>/<Algorithm>/<Experiment>/`:
+Results are written to `outputs/<Env>/<Algorithm>/seed_<seed>/<Experiment>/<run_id>/`:
 
 | File | Contents |
 |---|---|
-| `*_results.npz` | Policy, mean field, exploitabilities |
-| `mfg_experiment.log` | Full execution log |
+| `exploitabilities.npz` | Exploitability value per iteration |
+| `final_mean_field.npz` | Stationary mean field distribution |
+| `final_policy.npz` | Optimal policy (states × actions) |
+| `metrics.npz` | Wall-clock runtime |
+| `config.yaml` | Full Hydra config for reproducibility |
+
+---
+
+## Visualising Results
+
+After a run completes, the exact plot command is printed to the terminal. There are three plotting scripts depending on what you want to visualise.
+
+### 1 — Single run
+
+```bash
+PYTHONPATH=src python -m utility.plot_single_run <run_dir>
+# e.g.
+PYTHONPATH=src python -m utility.plot_single_run \
+  outputs/LasryLionsChain/OMD/seed_42/bench_mfg_lr0p0050_temp0p20/20260502_175255_575
+
+# Grid environments need extra flags:
+PYTHONPATH=src python -m utility.plot_single_run <run_dir> \
+  --is-grid --grid-rows 11 --grid-cols 11
+```
+
+Plots: exploitability curve, mean field distribution, policy heatmap. Also prints wall-clock runtime.
+
+### 2 — Hyperparameter sweep (one algorithm)
+
+Run this after completing a sweep for one algorithm. It plots all hyperparameter versions on
+the same axes and writes `results/<env>/<algo>_best_models.yaml` (used by step 3).
+
+```bash
+PYTHONPATH=src python -m utility.plot_sweep <environment> <algorithm>
+# e.g.
+PYTHONPATH=src python -m utility.plot_sweep LasryLionsChain OMD --log-scale
+PYTHONPATH=src python -m utility.plot_sweep LasryLionsChain PSO --log-scale
+```
+
+Known algorithm directory names: `PSO`, `OMD`, `DampedFP_damped`, `DampedFP_fictitious_play`,
+`DampedFP_pure`, `PI_smooth_policy_iteration`, `PI_boltzmann_policy_iteration`, `PI_policy_iteration`.
+
+### 3 — Cross-algorithm comparison
+
+Run this after completing step 2 for every algorithm you want to compare. It reads the
+`*_best_models.yaml` files to select the best hyperparameter configuration per algorithm.
+
+```bash
+PYTHONPATH=src python -m utility.plot_comparison <environment>
+# e.g.
+PYTHONPATH=src python -m utility.plot_comparison LasryLionsChain --log-scale
+```
+
+Produces: exploitability comparison plot (mean ± std per algorithm) and a runtime box chart.

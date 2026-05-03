@@ -9,6 +9,29 @@ from rich.table import Table
 from rich.tree import Tree
 
 
+def _gpu_available_but_cpu_selected(cfg: MFGConfig) -> bool:
+    """Return True when a JAX GPU backend is available but config uses CPU."""
+    if str(cfg.device).lower() != "cpu":
+        return False
+
+    try:
+        import jax
+
+        return len(jax.devices("gpu")) > 0
+    except Exception:
+        return False
+
+
+def _print_device_warning(console: Console, cfg: MFGConfig) -> None:
+    """Warn when GPU is available but the config is set to CPU."""
+    if _gpu_available_but_cpu_selected(cfg):
+        console.print(
+            "[bold yellow]Warning:[/bold yellow] GPU detected, but "
+            "[bold]device=cpu[/bold]. Consider changing the default config to "
+            "[bold]device=cuda[/bold]."
+        )
+
+
 def print_config_table(cfg: MFGConfig, style: str = "tree") -> None:
     """Print configuration in a nice hierarchical format.
 
@@ -79,6 +102,7 @@ def print_config_tree(cfg: MFGConfig) -> None:
         add_node(tree, str(key), value)
 
     console.print(tree)
+    _print_device_warning(console, cfg)
 
 
 def print_config_table_compact(cfg: MFGConfig) -> None:
@@ -128,3 +152,4 @@ def print_config_table_compact(cfg: MFGConfig) -> None:
 
     add_rows(cfg)
     console.print(table)
+    _print_device_warning(console, cfg)

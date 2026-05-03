@@ -1,9 +1,20 @@
 """Plot utilities for MFG experiments."""
 
 from conf.visualization.visualization_schema import ColorsConfig
+from matplotlib.colors import to_rgba
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
+
+
+def _get_color_config_value(colors: ColorsConfig, key: str):
+    """Read a color setting with fallback to schema defaults for older configs."""
+    default_colors = ColorsConfig()
+    try:
+        value = getattr(colors, key)
+    except Exception:
+        value = getattr(default_colors, key)
+    return value
 
 
 def plot_mean_field(
@@ -88,23 +99,39 @@ def plot_mean_field_evolution_1D(
     N_states = len(mean_field)
     states = np.arange(N_states)
     fig, ax = plt.subplots(1, 1, figsize=(8, 5))
-    fig.patch.set_facecolor(colors.figure_background)
-    bg_color = background_color if background_color is not None else "#D0D8E0"
+    fig.patch.set_facecolor(_get_color_config_value(colors, "figure_background"))
+    bg_color = (
+        background_color
+        if background_color is not None
+        else _get_color_config_value(colors, "mean_field_1d_background")
+    )
     ax.set_facecolor(bg_color)
 
     barwidth = 0.8
-    bar_col = bar_color if bar_color is not None else "#0F3E66"
+    bar_col = (
+        bar_color
+        if bar_color is not None
+        else _get_color_config_value(colors, "mean_field_1d_bar")
+    )
+    face_col = to_rgba(
+        bar_col,
+        alpha=_get_color_config_value(colors, "mean_field_1d_bar_alpha"),
+    )
     ax.bar(
         states,
         mean_field,
-        color=bar_col,
+        color=face_col,
         width=barwidth,
-        edgecolor=None,
-        alpha=0.8,
+        edgecolor=bar_col,
+        linewidth=_get_color_config_value(colors, "mean_field_1d_bar_linewidth"),
     )
     ax.set_xlabel("States", fontsize=28)
     ax.set_ylabel("Probability Mass", fontsize=28)
-    grid_col = grid_color if grid_color is not None else colors.mean_field_1d_grid
+    grid_col = (
+        grid_color
+        if grid_color is not None
+        else _get_color_config_value(colors, "mean_field_1d_grid")
+    )
     ax.grid(
         True,
         which="both",
@@ -402,7 +429,9 @@ def plot_policy_1D(
     fig, ax = plt.subplots(1, 1, figsize=(8, 4))
 
     # Use provided cmap or default from colors
-    policy_cmap = cmap if cmap is not None else colors.policy_cmap
+    policy_cmap = (
+        cmap if cmap is not None else _get_color_config_value(colors, "policy_cmap")
+    )
     # Explicitly set vmin and vmax to [0, 1] to ensure colorbar shows correct range
     c = ax.imshow(
         policy_array.T,

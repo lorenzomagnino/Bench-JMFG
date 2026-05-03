@@ -40,6 +40,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+cuda = [
+    'jax[cuda13]>=0.4.13; sys_platform == "linux"',
+]
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
@@ -143,3 +146,9 @@ combine-as-imports = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.20.2",
+    "types-pyyaml>=6.0.12.20260408",
+]

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from utility.plot_npz_results import load_exploitabilities
+from utility.plot_loaders import load_exploitabilities
 
 # Garnet version display names
 GARNET_DISPLAY_NAMES = {

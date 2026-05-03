@@ -5,9 +5,11 @@ from dataclasses import dataclass, field
 class ColorsConfig:
     """Color configuration for visualization."""
 
-    mean_field_1d_bar: str = "salmon"
-    mean_field_1d_background: str = "floralwhite"
-    mean_field_1d_grid: str = "white"
+    mean_field_1d_bar: str = "#2B6C96"
+    mean_field_1d_background: str = "white"
+    mean_field_1d_bar_alpha: float = 0.45
+    mean_field_1d_bar_linewidth: float = 4.0
+    mean_field_1d_grid: str = "lightgray"
 
     mean_field_2d_cmap: str = "viridis"
     mean_field_2d_walls_cmap: str = "Greys"
@@ -15,7 +17,7 @@ class ColorsConfig:
 
     mean_field_3d_cmap: str = "viridis"
 
-    policy_cmap: str = "viridis"
+    policy_cmap: str = "cividis"
     policy_grid: str = "gray"
 
     figure_background: str = "white"
