@@ -4,8 +4,8 @@
 set -e
 
 ENVIRONMENT="LasryLionsChain"
-# ENVIRONMENT="NoInteractionGame"
-# ENVIRONMENT="FourRoomsObstacles"
+# ENVIRONMENT="NoInteractionChain"
+# ENVIRONMENT="FourRoomsAversion2D"
 # ENVIRONMENT="RockPaperScissors"
 # ENVIRONMENT="SISEpidemic"
 # ENVIRONMENT="KineticCongestion"
