@@ -1,6 +1,14 @@
 """Utility functions for generating directory paths and names with variants and hyperparameters."""
 
+import os
+
 from conf.config_schema import MFGConfig
+
+
+def _artifacts_root_dir() -> str:
+    """Root for npz/config/plots; override with env BENCH_MFG_OUTPUT_ROOT (absolute path recommended)."""
+    root = os.environ.get("BENCH_MFG_OUTPUT_ROOT", "").strip().rstrip("/")
+    return root if root else "outputs"
 
 
 def get_algorithm_name_with_variant(cfg: MFGConfig) -> str:
@@ -83,9 +91,12 @@ def get_output_directory(cfg: MFGConfig) -> str:
         cfg: MFG configuration
 
     Returns:
-        Output directory path: outputs/${environment.name}/${algorithm_variant}/seed_${seed}/${experiment_name_with_hyperparams}
-        For Garnet environments: outputs/Garnet_{num_states}_{num_actions}_{branching_factor}/Garnet_{instance}/${algorithm_variant}/...
+        Relative or absolute path:
+        {artifacts_root}/{environment.name}/{algorithm_variant}/seed_{seed}/{experiment_name_with_hyperparams}
+        For Garnet: {artifacts_root}/Garnet_.../Garnet_{instance}/...
+        Default artifacts_root is \"outputs\"; set BENCH_MFG_OUTPUT_ROOT to redirect (match plot_sweep --outputs-dir).
     """
+    out_root = _artifacts_root_dir()
     algo_name = get_algorithm_name_with_variant(cfg)
     exp_name = get_experiment_name_with_hyperparams(cfg)
     env_name = cfg.environment.name
@@ -108,8 +119,8 @@ def get_output_directory(cfg: MFGConfig) -> str:
                 if instance_num is not None:
                     parent_dir = f"Garnet_{num_states}_{num_actions}_{branching_factor}_{dynamics_abbr}_{reward_abbr}"
                     instance_dir = f"Garnet_{instance_num + 1}"  # 1-indexed
-                    return f"outputs/{parent_dir}/{instance_dir}/{algo_name}/seed_{seed}/{exp_name}"
+                    return f"{out_root}/{parent_dir}/{instance_dir}/{algo_name}/seed_{seed}/{exp_name}"
         except (AttributeError, KeyError):
             pass
 
-    return f"outputs/{env_name}/{algo_name}/seed_{seed}/{exp_name}"
+    return f"{out_root}/{env_name}/{algo_name}/seed_{seed}/{exp_name}"
