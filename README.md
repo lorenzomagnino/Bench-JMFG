@@ -2,7 +2,7 @@
 
 <img src="favicon.svg" width="90" alt="Bench-MFG icon"/>
 
-# Bench-MFG
+# BenchMFG
 
 **A benchmark suite for Mean Field Game algorithms**
 
