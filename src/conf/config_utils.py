@@ -4,6 +4,7 @@ from typing import Any
 
 from conf.config_schema import MFGConfig
 from omegaconf import OmegaConf
+from omegaconf.errors import InterpolationKeyError, InterpolationResolutionError
 from rich.console import Console
 from rich.table import Table
 from rich.tree import Tree
@@ -53,6 +54,19 @@ def print_config_tree(cfg: MFGConfig) -> None:
     console = Console()
     tree = Tree("📋 Configuration", guide_style="bold bright_blue")
 
+    def resolve_leaf_for_display(select_path: str, raw: Any) -> Any:
+        """Resolve a leaf via OmegaConf.select when possible (prettier paths)."""
+        if not OmegaConf.is_config(cfg):
+            return raw
+        try:
+            return OmegaConf.select(cfg, select_path)
+        except (
+            InterpolationResolutionError,
+            InterpolationKeyError,
+            ValueError,
+        ):
+            return raw
+
     def format_value(value: Any) -> str:
         """Format a value for display."""
         if value is None:
@@ -64,42 +78,46 @@ def print_config_tree(cfg: MFGConfig) -> None:
             return f"[blue]{value_str}[/blue]"
         return f"[green]{value_str}[/green]"
 
-    def add_node(parent: Tree, key: str, value: Any, path: str = "") -> None:
-        """Recursively add nodes to the tree."""
-        full_path = f"{path}.{key}" if path else key
-
+    def add_node(parent: Tree, label: str, value: Any, select_path: str) -> None:
+        """Recursively add nodes; select_path is used for OmegaConf leaf resolution."""
         if OmegaConf.is_dict(value):
-            node = parent.add(f"[bold cyan]{key}[/bold cyan]")
-            for k, v in value.items():
-                add_node(node, k, v, full_path)
+            node = parent.add(f"[bold cyan]{label}[/bold cyan]")
+            for k, v in value.items_ex(resolve=False):
+                child_path = f"{select_path}.{k}"
+                add_node(node, str(k), v, child_path)
         elif OmegaConf.is_list(value):
             if len(value) == 0:
-                parent.add(f"[bold]{key}[/bold]: [dim]empty list[/dim]")
+                parent.add(f"[bold]{label}[/bold]: [dim]empty list[/dim]")
             else:
                 node = parent.add(
-                    f"[bold cyan]{key}[/bold cyan]: [dim]{len(value)} item(s)[/dim]"
+                    f"[bold cyan]{label}[/bold cyan]: [dim]{len(value)} item(s)[/dim]"
                 )
-                for i, item in enumerate(value):
+                for i in range(len(value)):
+                    item = value._get_node(i)
+                    idx_label = f"[{i}]"
+                    idx_path = f"{select_path}.{i}"
                     if OmegaConf.is_dict(item) or OmegaConf.is_list(item):
-                        add_node(node, f"[{i}]", item, full_path)
+                        add_node(node, idx_label, item, idx_path)
                     else:
-                        node.add(f"  [{i}]: {format_value(item)}")
+                        disp = resolve_leaf_for_display(idx_path, item)
+                        node.add(f"  [{i}]: {format_value(disp)}")
         else:
-            value_str = str(value)
+            disp = resolve_leaf_for_display(select_path, value)
+            value_str = str(disp)
             if len(value_str) > 60:
                 truncated = value_str[:57] + "..."
-                if isinstance(value, bool):
+                if isinstance(disp, bool):
                     formatted_value = f"[yellow]{truncated}[/yellow]"
-                elif isinstance(value, int | float):
+                elif isinstance(disp, int | float):
                     formatted_value = f"[blue]{truncated}[/blue]"
                 else:
                     formatted_value = f"[green]{truncated}[/green]"
             else:
-                formatted_value = format_value(value)
-            parent.add(f"[bold]{key}[/bold]: {formatted_value}")
+                formatted_value = format_value(disp)
+            parent.add(f"[bold]{label}[/bold]: {formatted_value}")
 
-    for key, value in cfg.items():
-        add_node(tree, str(key), value)
+    for key, value in cfg.items_ex(resolve=False):
+        add_node(tree, str(key), value, str(key))
 
     console.print(tree)
     _print_device_warning(console, cfg)
@@ -128,27 +146,42 @@ def print_config_table_compact(cfg: MFGConfig) -> None:
             return f"[blue]{value}[/blue]"
         return str(value)
 
-    def add_rows(value: Any, path: str = "") -> None:
-        """Recursively add rows to the table."""
+    def resolve_leaf_for_display(select_path: str, raw: Any) -> Any:
+        if not OmegaConf.is_config(cfg):
+            return raw
+        try:
+            return OmegaConf.select(cfg, select_path)
+        except (
+            InterpolationResolutionError,
+            InterpolationKeyError,
+            ValueError,
+        ):
+            return raw
+
+    def add_rows(value: Any, select_path: str = "") -> None:
+        """Recursively add rows; select_path matches OmegaConf.select dotted form."""
         if OmegaConf.is_dict(value):
-            for k, v in value.items():
-                new_path = f"{path}.{k}" if path else k
-                add_rows(v, new_path)
+            for k, v in value.items_ex(resolve=False):
+                child_path = f"{select_path}.{k}" if select_path else str(k)
+                add_rows(v, child_path)
         elif OmegaConf.is_list(value):
             if len(value) == 0:
-                table.add_row(path, "[dim]empty list[/dim]")
+                table.add_row(select_path, "[dim]empty list[/dim]")
             else:
-                for i, item in enumerate(value):
-                    new_path = f"{path}[{i}]" if path else f"[{i}]"
+                for i in range(len(value)):
+                    item = value._get_node(i)
+                    idx_path = f"{select_path}.{i}"
                     if OmegaConf.is_dict(item) or OmegaConf.is_list(item):
-                        add_rows(item, new_path)
+                        add_rows(item, idx_path)
                     else:
-                        table.add_row(new_path, format_value(item))
+                        disp = resolve_leaf_for_display(idx_path, item)
+                        table.add_row(idx_path, format_value(disp))
         else:
-            value_str = format_value(value)
+            disp = resolve_leaf_for_display(select_path, value)
+            value_str = format_value(disp)
             if len(value_str) > 80:
                 value_str = value_str[:77] + "..."
-            table.add_row(path, value_str)
+            table.add_row(select_path, value_str)
 
     add_rows(cfg)
     console.print(table)
