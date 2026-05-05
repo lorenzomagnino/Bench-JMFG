@@ -11,7 +11,6 @@
 [![uv](https://img.shields.io/badge/uv-package%20manager-purple.svg)](https://github.com/astral-sh/uv)
 [![ruff](https://img.shields.io/badge/ruff-⚡-gold.svg)](https://github.com/astral-sh/ruff)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen.svg)](https://github.com/pre-commit/pre-commit)
-[![arXiv](https://img.shields.io/badge/arXiv-2602.12517-b31b1b.svg)](https://arxiv.org/pdf/2602.12517)
 
 </div>
 
