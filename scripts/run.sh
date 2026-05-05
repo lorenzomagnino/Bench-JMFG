@@ -3,12 +3,12 @@
 
 set -e
 
-ENVIRONMENT="LasryLionsChain"
+# ENVIRONMENT="LasryLionsChain"
 # ENVIRONMENT="NoInteractionChain"
 # ENVIRONMENT="FourRoomsAversion2D"
 # ENVIRONMENT="RockPaperScissors"
 # ENVIRONMENT="SISEpidemic"
-# ENVIRONMENT="KineticCongestion"
+ENVIRONMENT="KineticCongestion"
 # ENVIRONMENT="MultipleEquilibriaGame"
 # ENVIRONMENT="ContractionGame"
 

@@ -10,11 +10,11 @@ defaults:
   - algorithm/pso
 # ----- ENVIRONMENTS -----
   # - environment/no_interaction_game
-  - environment/lasry_lions_chain
+  # - environment/lasry_lions_chain
   # - environment/four_rooms_obstacles
   # - environment/rock_paper_scissors
   # - environment/sis_epidemic
-  # - environment/kinetic_congestion
+  - environment/kinetic_congestion
   # - environment/mf_garnet
   # - environment/multiple_equilibria
   # - environment/contraction_game
@@ -23,7 +23,7 @@ defaults:
   - logging/logging
   - visualization/visualization
 
-device: "cuda:0"
+device: "cuda:0" # "cpu", "cuda:0", "cuda:1", etc.
 
 initialization:
   initialization_type: "PSO_uniform"
