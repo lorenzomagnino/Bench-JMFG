@@ -1,0 +1,116 @@
+\begin{tikzpicture}[font=\sffamily, x=1cm, y=1cm]
+
+    % --- Palette ---
+    \definecolor{envBlue}{RGB}{40, 90, 150}
+    \definecolor{envBg}{RGB}{240, 246, 252}
+    \definecolor{algoOrange}{RGB}{91, 52, 148}
+    \definecolor{algoBg}{RGB}{243, 237, 255}
+    \definecolor{infraGray}{RGB}{245, 245, 245}
+    \definecolor{textDark}{RGB}{25, 25, 25}
+    \definecolor{borderGray}{RGB}{200, 200, 200}
+
+    % Branding text colors
+    \definecolor{darkTeal}{RGB}{0, 102, 102}
+    \definecolor{darkPurple}{RGB}{102, 0, 102}
+
+    % --- Font sizes (pt) — change these to rescale all text ---
+    \def\fsParent{6}      % headers and parent labels
+    \def\fsChild{5.5}     % child labels and infra items
+    \def\fsBrand{11}      % BenchMFG title
+
+    % --- Styles ---
+    \tikzset{
+        header/.style={font=\bfseries\fontsize{\fsParent}{8.4}\selectfont, text=textDark, anchor=north west},
+        parent/.style={font=\bfseries\fontsize{\fsParent}{8.4}\selectfont, text=textDark, anchor=north west, inner sep=1pt},
+        child/.style={font=\fontsize{\fsChild}{6.6}\selectfont, text=textDark, anchor=north west, inner sep=1pt},
+        conn/.style={draw=borderGray, rounded corners=1pt, line width=0.5pt},
+    }
+
+    % --- Parameters ---
+    \def\centerX{5.0}
+    \def\sepY{-2.0}
+    \def\gap{0.02}
+    \def\bottomY{-3.8}
+    % New branding center for graphic and text
+    \def\brandCX{2.9}
+
+    % =======================================================
+    % BACKGROUND PANELS
+    % =======================================================
+    \fill[envBg, draw=envBlue!40, line width=1.0pt, rounded corners=5pt]
+        (0,0) -- (10,0) -- (10, \sepY+\gap) -- (0, \sepY+\gap) -- cycle;
+
+    \fill[algoBg, draw=algoOrange!50, line width=1.0pt, rounded corners=5pt]
+        (0, \sepY-\gap) -- (7.5, \sepY-\gap) -- (7.5, \bottomY) -- (0, \bottomY) -- cycle;
+
+    \fill[infraGray, draw=borderGray!60, line width=1.0pt, rounded corners=5pt]
+        (7.55, \sepY-\gap) -- (10, \sepY-\gap) -- (10, \bottomY) -- (7.55, \bottomY) -- cycle;
+
+    % =======================================================
+    % CENTRAL BRANDING AREA (Icon + Text)
+    % =======================================================
+
+    % Blend border into panel backgrounds in branding area
+    \fill[envBg]  (2.4, \sepY)      rectangle (6.2, \sepY+0.06);
+    \fill[algoBg] (2.4, \sepY-0.06) rectangle (6.2, \sepY);
+
+    % Grape icon (transparent PDF)
+    \node at (\brandCX+0.1, \sepY+0.03) {\includegraphics[width=0.90cm]{figures/favicon}};
+
+    % --- BRANDING TEXT (Shifted for visual balance) ---
+    \node[anchor=center] at (\brandCX+1.85, \sepY) {\fontsize{\fsBrand}{14.4}\selectfont\bfseries \textcolor{darkTeal}{Bench}\textcolor{darkPurple}{MFG}};
+
+    % =======================================================
+    % TOP: ENVIRONMENTS
+    % =======================================================
+    \node[header] at (0.3, -0.05) {Taxonomy $\to$ Environments};
+
+    \node[parent] (e1) at (0.3, -0.50) {\textcolor{envBlue}{$\bullet$} No Interaction};
+    \node[child] (c1) at (0.6, -0.8) {Move Forward};
+    \node[parent] (e2) at (0.3, -1.1) {\textcolor{envBlue}{$\bullet$} Contractive};
+    \node[child] (c2) at (0.6, -1.4) {Coordination Game};
+
+    \node[parent] (e3) at (3.2, -0.50) {\textcolor{envBlue}{$\bullet$} Lasry-Lions};
+    \node[child] (c3) at (3.5, -0.8) {Beach Bar Problem / Two Beach Bars};
+    \node[parent] (e4) at (3.2, -1.1) {\textcolor{envBlue}{$\bullet$} Potential Game};
+    \node[child] (c4) at (3.5, -1.4) {Four Rooms / RockPaperScissors};
+
+    \node[parent] (e5) at (7.0, -0.50) {\textcolor{envBlue}{$\bullet$} Dynamics-Coupled};
+    \node[child] (c5) at (7.3, -0.8) {SIS epid. / Kinetic Congestion};
+    \node[parent] (e6) at (7.0, -1.1) {\textcolor{envBlue}{$\bullet$} $\star$ MF Garnet (Novel!)};
+    \node[child] (c6) at (7.3, -1.4) {Random Instances};
+
+    \foreach \p/\c in {e1/c1, e2/c2, e3/c3, e4/c4, e5/c5, e6/c6}
+        \draw[conn] (\p.south west) ++(0.1,0.1) |- (\c.west);
+
+    % =======================================================
+    % BOTTOM: ALGORITHMS
+    % =======================================================
+    \node[header] at (0.3, -2.05) {Algorithms};
+
+    \node[parent] (a1) at (0.3, -2.50) {\textcolor{algoOrange}{$\bullet$} BR-based FP};
+    \node[child] (a1c1) at (0.6, -2.85) {Fixed Point};
+    \node[child] (a1c2) at (0.6, -3.15) {Damped FP};
+    \node[child] (a1c3) at (0.6, -3.450) {Fictitious Play};
+    \foreach \c in {a1c1, a1c2, a1c3} \draw[conn] (a1.south west) ++(0.1,0.1) |- (\c.west);
+
+    \node[parent] (a2) at (2.8, -2.50) {\textcolor{algoOrange}{$\bullet$} Policy-Eval};
+    \node[child] (a2c1) at (3.1, -2.850) {Policy Iteration};
+    \node[child] (a2c2) at (3.1, -3.150) {Boltzmann PI/Smooth PI};
+    \node[child] (a2c3) at (3.1, -3.450) {Online Mirror Descent};
+    \foreach \c in {a2c1, a2c2, a2c3} \draw[conn] (a2.south west) ++(0.1,0.1) |- (\c.west);
+
+    \node[parent] (a3) at (5.1, -2.50) {\textcolor{algoOrange}{$\bullet$} Sample-Based};
+    \node[child] (a3c1) at (5.4, -2.850) {\textbf{$\star$ MF-PSO (Novel!)}};
+    \foreach \c in {a3c1} \draw[conn] (a3.south west) ++(0.1,0.1) |- (\c.west);
+
+    % =======================================================
+    % BOTTOM RIGHT: INFRA
+    % =======================================================
+    % Infra panel — requires \usepackage{fontawesome5} in preamble
+    \node[font=\bfseries\fontsize{\fsParent}{8.4}\selectfont, text=textDark, anchor=north west] at (7.75, -2.15) {Infra};
+    \node[font=\fontsize{\fsChild}{6.6}\selectfont\bfseries, text=textDark, anchor=north west] at (7.56, -2.6) {{\color{algoOrange}\faCog}\ \ Hydra config};
+    \node[font=\fontsize{\fsChild}{6.6}\selectfont\bfseries, text=textDark, anchor=north west] at (7.56, -2.9) {{\color{algoOrange}\faBolt}\ \,JAX\,/\,{\color{algoOrange}\faPython}\ Python};
+    \node[font=\fontsize{\fsChild}{6.6}\selectfont\bfseries, text=textDark, anchor=north west] at (7.56, -3.2) {{\color{algoOrange}\faChartLine}\ \ Logging};
+
+\end{tikzpicture}
