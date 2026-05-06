@@ -79,6 +79,12 @@ def find_best_model_npz(
         Path to the NPZ file.
     """
     project_root = Path(__file__).parent.parent
+
+    # Fast path: npz already collected into results/ by collect_best_artifacts
+    cached = project_root / "results" / environment / "best" / npz_filename
+    if cached.exists():
+        return cached
+
     yaml_path = project_root / "results" / environment / "best" / "best_model.yaml"
 
     if not yaml_path.exists():

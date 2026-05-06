@@ -11,13 +11,13 @@ class ColorsConfig:
     mean_field_1d_bar_linewidth: float = 4.0
     mean_field_1d_grid: str = "lightgray"
 
-    mean_field_2d_cmap: str = "viridis"
+    mean_field_2d_cmap: str = "BuPu"
     mean_field_2d_walls_cmap: str = "Greys"
     mean_field_2d_grid: str = "lightgray"
 
     mean_field_3d_cmap: str = "viridis"
 
-    policy_cmap: str = "cividis"
+    policy_cmap: str = "RdPu"
     policy_grid: str = "gray"
 
     figure_background: str = "white"
@@ -27,4 +27,13 @@ class ColorsConfig:
     )
     policy2d_action_labels: list[str] | None = field(
         default_factory=lambda: ["up", "right", "down", "left", "stay"]
+    )
+    policy2d_action_colors: list[str] | None = field(
+        default_factory=lambda: [
+            "#7B2FBE",  # purple
+            "#4A55A2",  # blue-purplish
+            "#FA8072",  # salmon
+            "#2D6A4F",  # dark cold green
+            "#1B7A7A",  # teal
+        ]
     )

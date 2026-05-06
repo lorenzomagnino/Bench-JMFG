@@ -152,7 +152,7 @@ def plot_mean_field_evolution_1D(
     if y_max >= 0.9:
         y_ticks = np.arange(0, 1.1, 0.2)
     ax.set_yticks(y_ticks)
-    ax.tick_params(axis="both", which="major", labelsize=22)
+    ax.tick_params(axis="both", which="major", labelsize=26)
 
     plt.tight_layout()
 
@@ -223,32 +223,13 @@ def plot_mean_field_evolution_2D(
     ax.set_xlabel("X-axis", fontsize=22)
     ax.set_ylabel("Y-axis", fontsize=22)
 
-    if n_cols <= 10:
-        x_step = 1
-    elif n_cols <= 20:
-        x_step = 2
-    else:
-        x_step = max(1, n_cols // 10)
-
-    if n_rows <= 10:
-        y_step = 1
-    elif n_rows <= 20:
-        y_step = 2
-    else:
-        y_step = max(1, n_rows // 10)
-
-    x_ticks = np.arange(0, n_cols, x_step)
-    if x_ticks[-1] != n_cols - 1:
-        x_ticks = np.append(x_ticks, n_cols - 1)
-
-    y_ticks = np.arange(0, n_rows, y_step)
-    if y_ticks[-1] != n_rows - 1:
-        y_ticks = np.append(y_ticks, n_rows - 1)
+    x_ticks = [0, n_cols // 2, n_cols - 1]
+    y_ticks = [0, n_rows // 2, n_rows - 1]
 
     ax.set_xticks(x_ticks)
-    ax.set_xticklabels([str(int(i)) for i in x_ticks])
+    ax.set_xticklabels([str(i) for i in x_ticks])
     ax.set_yticks(y_ticks)
-    ax.set_yticklabels([str(int(i)) for i in y_ticks])
+    ax.set_yticklabels([str(i) for i in y_ticks])
     ax.tick_params(axis="both", which="major", labelsize=20)
 
     ax.set_xticks(np.arange(-0.5, n_cols, 1), minor=True)
@@ -265,7 +246,16 @@ def plot_mean_field_evolution_2D(
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.05)
     cbar = fig.colorbar(im, cax=cax)
-    cbar.ax.tick_params(labelsize=18)
+    from matplotlib.ticker import FixedFormatter, FixedLocator
+
+    vmin = float(mean_field.min())
+    vmax = float(mean_field.max())
+    vmid = round((vmin + vmax) / 2, 3)
+    cbar.ax.yaxis.set_major_locator(FixedLocator([vmin, vmid, vmax]))
+    cbar.ax.yaxis.set_major_formatter(
+        FixedFormatter([f"{vmin:.3f}", f"{vmid:.3f}", f"{vmax:.3f}"])
+    )
+    cbar.ax.tick_params(labelsize=22)
 
     plt.tight_layout()
 
@@ -441,13 +431,15 @@ def plot_policy_1D(
         vmin=0.0,
         vmax=1.0,
     )
-    ax.set_xticks(np.arange(N_states))
+    # 3 evenly-spaced x ticks (start, middle, end)
+    x_ticks = [0, N_states // 2, N_states - 1]
+    ax.set_xticks(x_ticks)
+    ax.set_xticklabels([str(i) for i in x_ticks])
+
     ax.set_yticks(np.arange(N_actions))
     if action_labels is None:
-        # Generate default action labels based on number of actions
         action_labels = [str(i) for i in range(N_actions)]
     elif len(action_labels) < N_actions:
-        # If provided labels are insufficient, extend with default labels
         action_labels = list(action_labels) + [
             str(i) for i in range(len(action_labels), N_actions)
         ]
@@ -457,22 +449,14 @@ def plot_policy_1D(
     ax.set_xticks(np.arange(-0.5, N_states, 1), minor=True)
     ax.set_yticks(np.arange(-0.5, N_actions, 1), minor=True)
     ax.grid(which="minor", color=colors.policy_grid, linestyle="--", linewidth=0.5)
-    # Make tick numbers bigger
-    ax.tick_params(axis="both", which="major", labelsize=22)
+    ax.tick_params(axis="both", which="major", labelsize=26)
+
+    from matplotlib.ticker import FixedFormatter, FixedLocator
 
     cbar = fig.colorbar(c, ax=ax)
-    cbar.ax.tick_params(labelsize=18)
-    # Format colorbar to show values between 0 and 1 with appropriate precision
-    from matplotlib.ticker import MaxNLocator, ScalarFormatter
-
-    # Set reasonable number of ticks (e.g., 5 ticks for 0 to 1 range)
-    cbar.locator = MaxNLocator(nbins=5)
-    cbar.update_ticks()
-    # Format as decimals (e.g., 0.0, 0.25, 0.5, 0.75, 1.0) without scientific notation
-    formatter = ScalarFormatter(useMathText=False)
-    formatter.set_scientific(False)
-    formatter.set_useOffset(False)
-    cbar.ax.yaxis.set_major_formatter(formatter)
+    cbar.ax.yaxis.set_major_locator(FixedLocator([0.0, 0.5, 1.0]))
+    cbar.ax.yaxis.set_major_formatter(FixedFormatter(["0.0", "0.5", "1.0"]))
+    cbar.ax.tick_params(labelsize=26)
 
     plt.tight_layout()
 
@@ -538,10 +522,8 @@ def plot_policy_2D(
 
         colors = ColorsConfig()
 
-    if n_rows == 11 and n_cols == 11:
-        if tick_step is None:
-            tick_step = 2  # Show ticks at 0, 2, 4, etc.
-        show_interval_in_labels = False
+    if n_rows == 11 and n_cols == 11 and tick_step is None:
+        tick_step = 2  # Show ticks at 0, 2, 4, etc.
 
     if action_cmaps is None:
         if (
@@ -591,40 +573,48 @@ def plot_policy_2D(
             len(action_labels) == N_actions
         ), f"Number of action labels ({len(action_labels)}) must match number of actions ({N_actions})"
 
+    import matplotlib.colors as mcolors
+
+    # Resolve solid colors for each action
+    if (
+        colors.policy2d_action_colors is not None
+        and len(colors.policy2d_action_colors) >= N_actions
+    ):
+        action_colors_hex = colors.policy2d_action_colors[:N_actions]
+    else:
+        action_colors_hex = ["#7B2FBE", "#4A55A2", "#FA8072", "#2D6A4F", "#1B7A7A"][
+            :N_actions
+        ]
+
+    action_colors_rgb = [mcolors.to_rgb(c) for c in action_colors_hex]
+
     fig, ax = plt.subplots(1, 1, figsize=(6, 5))
 
-    best_actions = np.argmax(policy_array, axis=1, out=None)
-
+    best_actions = np.argmax(policy_array, axis=1)
     rgb_image = np.zeros((n_rows, n_cols, 3))
 
     action_info = []
 
     for action_idx in range(N_actions):
-        action_probs = policy_array[:, action_idx]
-        action_probs_2d = action_probs.reshape(grid_dim)
-
-        prob_min = action_probs_2d.min()
-        prob_max = action_probs_2d.max()
-
-        cmap = plt.get_cmap(action_cmaps[action_idx])
-
         action_mask = best_actions == action_idx
         if np.any(action_mask):
-            normalized_probs = np.clip(action_probs_2d, 0.0, 1.0)
-
-            rgba = cmap(normalized_probs)
             mask_2d = action_mask.reshape(grid_dim)
-            rgb_image[mask_2d, :] = rgba[mask_2d, :3]
+            rgb_image[mask_2d, :] = action_colors_rgb[action_idx]
 
         action_info.append(
             {
                 "action_idx": action_idx,
                 "action_label": action_labels[action_idx],
-                "cmap": cmap,
-                "prob_min": prob_min,
-                "prob_max": prob_max,
+                "color": action_colors_hex[action_idx],
             }
         )
+
+    # Paint wall cells white before rendering
+    wall_mask_2d = None
+    if walls is not None:
+        walls_reshaped = np.array(walls).reshape(grid_dim)
+        wall_mask_2d = walls_reshaped == 0
+        rgb_image[wall_mask_2d, :] = 1.0
 
     ax.imshow(
         rgb_image,
@@ -633,38 +623,33 @@ def plot_policy_2D(
         aspect="equal",
     )
 
-    # Overlay walls in dark grey if provided
-    if walls is not None:
-        walls_reshaped = np.array(walls).reshape(grid_dim)
-        wall_image = np.ones((n_rows, n_cols, 4))  # RGBA
-        wall_image[:, :, :3] = 0.3  # Dark grey RGB (0.3, 0.3, 0.3)
-        wall_image[:, :, 3] = 1.0
-        wall_mask = walls_reshaped == 0
-        wall_image[~wall_mask, 3] = 0.0
-        ax.imshow(
-            wall_image,
-            origin="lower",
-            interpolation="nearest",
-            aspect="equal",
-        )
+    # Draw wall cells as white rectangles with black border
+    if wall_mask_2d is not None:
+        from matplotlib.patches import Rectangle as _Rect
+
+        for r in range(n_rows):
+            for c in range(n_cols):
+                if wall_mask_2d[r, c]:
+                    ax.add_patch(
+                        _Rect(
+                            (c - 0.5, r - 0.5),
+                            1,
+                            1,
+                            linewidth=1.5,
+                            edgecolor="black",
+                            facecolor="white",
+                        )
+                    )
 
     ax.set_xlabel("X-axis", fontsize=28)
     ax.set_ylabel("Y-axis", fontsize=28)
 
-    if tick_step is None:
-        tick_step = 2 if n_cols == 11 and n_rows == 11 else 1
-
-    x_ticks = np.arange(0, n_cols, tick_step)
-    if x_ticks[-1] != n_cols - 1:
-        x_ticks = np.append(x_ticks, n_cols - 1)
+    x_ticks = [0, n_cols // 2, n_cols - 1]
+    y_ticks = [0, n_rows // 2, n_rows - 1]
     ax.set_xticks(x_ticks)
-    ax.set_xticklabels([str(int(i)) for i in x_ticks])
-
-    y_ticks = np.arange(0, n_rows, tick_step)
-    if y_ticks[-1] != n_rows - 1:
-        y_ticks = np.append(y_ticks, n_rows - 1)
+    ax.set_xticklabels([str(i) for i in x_ticks])
     ax.set_yticks(y_ticks)
-    ax.set_yticklabels([str(int(i)) for i in y_ticks])
+    ax.set_yticklabels([str(i) for i in y_ticks])
 
     ax.tick_params(axis="both", which="major", labelsize=22)
 
@@ -681,32 +666,28 @@ def plot_policy_2D(
 
     from matplotlib.patches import Rectangle
 
-    legend_elements = []
+    patches, labels = [], []
     for info in action_info:
-        cmap = info["cmap"]
-        max_prob_clipped = np.clip(info["prob_max"], 0.0, 1.0)
-        color = cmap(max_prob_clipped)
-
-        if show_interval_in_labels:
-            label = f"{info['action_label']}\n[{info['prob_min']:.2f}, {info['prob_max']:.3f}]"
-        else:
-            label = info["action_label"]
-
         patch = Rectangle(
-            (0, 0), 1, 1, facecolor=color, edgecolor="black", linewidth=0.5
+            (0, 0),
+            1,
+            1,
+            facecolor=info["color"],
+            edgecolor="none",
+            alpha=1.0,
         )
-        legend_elements.append((patch, label))
-
-    patches = [elem[0] for elem in legend_elements]
-    labels = [elem[1] for elem in legend_elements]
+        patches.append(patch)
+        labels.append(info["action_label"])
 
     ax.legend(
         patches,
         labels,
         loc="center left",
         bbox_to_anchor=(1.02, 0.5),
-        fontsize=16,
+        fontsize=20,
         frameon=False,
+        handlelength=1.5,
+        handleheight=1.5,
     )
 
     plt.tight_layout()

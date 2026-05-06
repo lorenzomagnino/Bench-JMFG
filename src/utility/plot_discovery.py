@@ -226,9 +226,9 @@ def version_to_algorithm_name(version_withhyper: str) -> str:
     """
     v = version_withhyper.lower()
     if "pure_fp" in v or v.startswith("pure"):
-        return "Fixed Point (FP)"
+        return "FP"
     elif "fplay" in v or "fictitious" in v:
-        return "Fictitious Play"
+        return "Fict. Play"
     elif "smooth_policy_iteration" in v or "smooth_pi_sweep" in v:
         return "Smooth PI"
     elif "boltzmann_policy_iteration" in v or "boltzmann_pi_sweep" in v:

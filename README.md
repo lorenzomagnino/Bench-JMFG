@@ -187,7 +187,11 @@ Run this after completing step 2 for every algorithm you want to compare. It rea
 ```bash
 PYTHONPATH=src python -m utility.plot_comparison <environment>
 # e.g.
-PYTHONPATH=src python -m utility.plot_comparison LasryLionsChain --log-scale
+PYTHONPATH=src python -m utility.plot_comparison LasryLionsChain
+```
+or all the envs running
+```bash
+bash scripts/generate_comparisons.sh
 ```
 
 Produces: exploitability comparison plot (mean ± std per algorithm) and a runtime box chart.

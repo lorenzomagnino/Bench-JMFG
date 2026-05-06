@@ -94,8 +94,8 @@ def _format_log_y_axis(ax) -> None:
 
 def plot_exploitability(
     exploitabilities: np.ndarray,
-    xlabel: str = "Iteration",
-    ylabel: str = "Exploitability",
+    xlabel: str = "Iter.",
+    ylabel: str = "Exploit.",
     return_fig: bool = False,
     fn: str | Path | None = None,
     log_scale: bool = False,
@@ -142,7 +142,7 @@ def plot_exploitability(
         )
     ax.set_xlabel(xlabel, fontsize=28)
     ax.set_ylabel(ylabel, fontsize=28)
-    ax.tick_params(axis="both", labelsize=22)
+    ax.tick_params(axis="both", labelsize=28)
     ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.6)
 
     max_iter = len(iterations) - 1
@@ -166,8 +166,8 @@ def plot_exploitability(
 
 def plot_exploitability_from_npz(
     npz_path: str | Path,
-    xlabel: str = "Iteration",
-    ylabel: str = "Exploitability",
+    xlabel: str = "Iter.",
+    ylabel: str = "Exploit.",
     return_fig: bool = False,
     fn: str | Path | None = None,
     log_scale: bool = False,
@@ -327,8 +327,8 @@ def plot_policy_from_npz(
 
 def plot_exploitability_mean_variance(
     exploitabilities_list: list[np.ndarray],
-    xlabel: str = "Iteration",
-    ylabel: str = "Exploitability",
+    xlabel: str = "Iter.",
+    ylabel: str = "Exploit.",
     return_fig: bool = False,
     fn: str | Path | None = None,
     log_scale: bool = False,
@@ -394,7 +394,7 @@ def plot_exploitability_mean_variance(
 
     ax.set_xlabel(xlabel, fontsize=28)
     ax.set_ylabel(ylabel, fontsize=28)
-    ax.tick_params(axis="both", labelsize=22)
+    ax.tick_params(axis="both", labelsize=28)
     ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.6)
 
     max_iter = len(iterations) - 1
@@ -429,8 +429,8 @@ def plot_exploitability_mean_variance(
 def plot_exploitability_groups(
     exploitabilities_groups: list[list[np.ndarray]],
     labels: list[str] | None = None,
-    xlabel: str = "Iteration",
-    ylabel: str = "Exploitability",
+    xlabel: str = "Iter.",
+    ylabel: str = "Exploit.",
     return_fig: bool = False,
     fn: str | Path | None = None,
     log_scale: bool = False,
@@ -526,7 +526,7 @@ def plot_exploitability_groups(
                 plot_marker = marker
             else:
                 plot_marker = "o"
-            marker_size = 6 if plot_marker == "o" else 5
+            marker_size = 11 if plot_marker == "o" else 10
         else:
             iterations_plot = iterations
             mean_exp_plot = mean_exp
@@ -557,10 +557,9 @@ def plot_exploitability_groups(
             color=color,
         )
 
-    axis_label_size = 34 if num_groups > 10 else 28
-    ax.set_xlabel(xlabel, fontsize=axis_label_size)
-    ax.set_ylabel(ylabel, fontsize=axis_label_size)
-    tick_labelsize = 26 if num_groups > 10 else 22
+    ax.set_xlabel(xlabel, fontsize=32)
+    ax.set_ylabel(ylabel, fontsize=32)
+    tick_labelsize = 30 if num_groups > 10 else 28
     ax.tick_params(axis="both", which="major", labelsize=tick_labelsize)
     ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.6)
 
@@ -598,9 +597,9 @@ def plot_exploitability_groups(
         if legend_loc is not None:
             if legend_loc == "right":
                 fontsize = (
-                    12
+                    15
                     if num_groups > 20
-                    else (13 if num_groups > 10 else (14 if num_groups > 5 else 15))
+                    else (16 if num_groups > 10 else (17 if num_groups > 5 else 18))
                 )
                 ax.legend(
                     loc="center left",
@@ -608,26 +607,28 @@ def plot_exploitability_groups(
                     ncol=1,
                     fontsize=fontsize,
                     frameon=True,
+                    framealpha=0.35,
                     handler_map={Line2D: HandlerCircle()},
                 )
             else:
                 if num_groups > 20:
                     ncol = min(6, (num_groups + 4) // 5)
-                    fontsize = 14
+                    fontsize = 17
                 elif num_groups > 10:
                     ncol = min(5, (num_groups + 3) // 4)
-                    fontsize = 15
+                    fontsize = 18
                 elif num_groups > 5:
                     ncol = min(3, (num_groups + 2) // 3)
-                    fontsize = 16
+                    fontsize = 19
                 else:
                     ncol = 2
-                    fontsize = 18
+                    fontsize = 21
                 ax.legend(
                     loc=legend_loc,
                     ncol=ncol,
                     fontsize=fontsize,
                     frameon=True,
+                    framealpha=0.35,
                     handler_map={Line2D: HandlerCircle()},
                 )
         else:
@@ -635,13 +636,13 @@ def plot_exploitability_groups(
             nrows = (num_groups + ncol - 1) // ncol
 
             if nrows > 6:
-                y_offset, fontsize = -0.30, 24
+                y_offset, fontsize = -0.30, 27
             elif nrows > 4:
-                y_offset, fontsize = -0.27, 25
+                y_offset, fontsize = -0.27, 28
             elif nrows > 2:
-                y_offset, fontsize = -0.24, 26
+                y_offset, fontsize = -0.24, 29
             else:
-                y_offset, fontsize = -0.21, 27
+                y_offset, fontsize = -0.21, 30
 
             ax.legend(
                 loc="upper center",
@@ -649,6 +650,7 @@ def plot_exploitability_groups(
                 ncol=ncol,
                 fontsize=fontsize,
                 frameon=True,
+                framealpha=0.5,
                 handler_map={Line2D: HandlerCircle()},
                 columnspacing=1.0,
             )
@@ -691,8 +693,8 @@ def plot_exploitability_multiple_versions(
     environment: str,
     versions_withhyper: list[str],
     outputs_dir: str | Path = "outputs",
-    xlabel: str = "Iteration",
-    ylabel: str = "Exploitability",
+    xlabel: str = "Iter.",
+    ylabel: str = "Exploit.",
     return_fig: bool = False,
     fn: str | Path | None = None,
     log_scale: bool = False,
@@ -902,9 +904,13 @@ def plot_runtime_bar(
         color_list = [default_colors[i % len(default_colors)] for i in range(len(data))]
 
     n = len(labels)
-    fig_h = max(2.5, n * 0.55 + 1.0)
+    fig_h = max(2.0, n * 0.38 + 0.5)
     fig, ax = plt.subplots(figsize=(5, fig_h))
     fig.patch.set_facecolor(colors.figure_background)
+
+    import math
+
+    import matplotlib.colors as mcolors
 
     bp = ax.boxplot(
         data,
@@ -915,13 +921,17 @@ def plot_runtime_bar(
         medianprops={"color": "black", "linewidth": 1.5},
     )
 
-    for patch, flier, color in zip(bp["boxes"], bp["fliers"], color_list, strict=False):
-        patch.set_facecolor(color)
-        patch.set_alpha(0.75)
-        flier.set_markerfacecolor(color)
-        flier.set_markeredgecolor(color)
-
     for i, color in enumerate(color_list):
+        # Colored border, transparent fill — no global alpha so face/edge differ
+        patch = bp["boxes"][i]
+        patch.set_facecolor(mcolors.to_rgba(color, alpha=0.25))
+        patch.set_edgecolor(color)
+        patch.set_linewidth(1.5)
+
+        if i < len(bp["fliers"]):
+            bp["fliers"][i].set_markerfacecolor(color)
+            bp["fliers"][i].set_markeredgecolor(color)
+
         for w in bp["whiskers"][2 * i : 2 * i + 2]:
             w.set_color(color)
         for c in bp["caps"][2 * i : 2 * i + 2]:
@@ -929,11 +939,58 @@ def plot_runtime_bar(
 
     ax.set_xscale("log")
     ax.set_yticks(range(1, n + 1))
-    ax.set_yticklabels(labels, fontsize=13)
-    ax.set_xlabel("Wall-clock runtime (s)", fontsize=13)
+    ax.set_yticklabels([""] * n)  # labels drawn inside the plot
+    ax.set_xlabel("", fontsize=15)
     ax.grid(True, axis="x", linestyle="--", linewidth=0.4, alpha=0.5)
-    ax.tick_params(axis="x", labelsize=11)
+    ax.tick_params(axis="x", labelsize=13)
     ax.invert_yaxis()
+
+    # Derive x-axis range from actual data — only show decade ticks within range
+    all_vals = [v for dataset in data for v in dataset]
+    log_data_min = np.log10(min(all_vals))
+    log_data_max = np.log10(max(all_vals))
+    log_pad = 0.12
+    log_xmin = log_data_min - log_pad
+    log_xmax_data = log_data_max + log_pad
+
+    first_dec = math.ceil(log_xmin + 0.05)
+    last_dec = math.floor(log_xmax_data - 0.05)
+    ax.set_xticks([10**k for k in range(first_dec, last_dec + 1)])
+    ax.xaxis.set_major_formatter(LogFormatterSciNotation())
+
+    # Small right extension for right-side labels only
+    log_range_data = log_xmax_data - log_xmin
+    log_xmax_display = log_xmax_data + 0.18 * log_range_data
+    ax.set_xlim(10**log_xmin, 10**log_xmax_display)
+
+    log_range = log_xmax_display - log_xmin
+    gap = 10 ** (0.025 * log_range)
+    threshold_x = 10 ** (log_xmin + 0.55 * log_range_data)
+
+    for i, (label, color) in enumerate(zip(labels, color_list, strict=False)):
+        row = i + 1
+        high_cap = bp["caps"][2 * i + 1].get_xdata()[0]
+        low_cap = bp["caps"][2 * i].get_xdata()[0]
+        if high_cap < threshold_x:
+            ax.text(
+                high_cap * gap,
+                row,
+                label,
+                va="center",
+                ha="left",
+                fontsize=14,
+                color=color,
+            )
+        else:
+            ax.text(
+                low_cap / gap,
+                row,
+                label,
+                va="center",
+                ha="right",
+                fontsize=14,
+                color=color,
+            )
 
     plt.tight_layout()
     _save_fig(fig, fn)
