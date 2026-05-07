@@ -6,9 +6,13 @@
 
 **A benchmark suite for Mean Field Game algorithms**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![JAX](https://img.shields.io/badge/JAX-accel.-salmon.svg)](https://github.com/google/jax)
+[![Hydra](https://img.shields.io/badge/Hydra-config-89b8cd.svg)](https://hydra.cc)
 [![uv](https://img.shields.io/badge/uv-package%20manager-purple.svg)](https://github.com/astral-sh/uv)
+
+[![Unit tests](https://img.shields.io/badge/unit%20tests-passed-brightgreen.svg)](https://docs.pytest.org/)
 [![ruff](https://img.shields.io/badge/ruff-⚡-gold.svg)](https://github.com/astral-sh/ruff)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen.svg)](https://github.com/pre-commit/pre-commit)
 
