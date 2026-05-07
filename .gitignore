@@ -28,6 +28,12 @@ htmlcov/
 .idea/
 *.swp
 
+# Local assistant configuration
+.claude/
+
+# Local/anonymous publishing excludes
+.github/
+
 # OS
 .DS_Store
 
