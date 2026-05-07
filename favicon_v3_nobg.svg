@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+
+  <!-- Ribbon 1 – dark cold green (flattest, bottom of fan) -->
+  <path d="
+    M 8 72 C 26 72, 78 73, 95 74
+    L 95 82 C 78 81, 26 76, 8 76 Z"
+    fill="#1E6B50" opacity="0.88"/>
+
+  <!-- Ribbon 2 – dark teal -->
+  <path d="
+    M 8 70 C 26 70, 78 51, 95 50
+    L 95 60 C 78 61, 26 72, 8 72 Z"
+    fill="#1A6080" opacity="0.90"/>
+
+  <!-- Ribbon 3 – light purple -->
+  <path d="
+    M 8 68 C 26 68, 78 34, 95 33
+    L 95 43 C 78 42, 26 70, 8 70 Z"
+    fill="#7B52B8" opacity="0.90"/>
+
+  <!-- Ribbon 4 – dark purple (steepest, top of fan) -->
+  <path d="
+    M 8 66 C 26 66, 78 19, 95 18
+    L 95 27 C 78 26, 26 68, 8 68 Z"
+    fill="#5B3494" opacity="0.90"/>
+
+  <!-- Thin highlight on each ribbon (top edge, lighter) -->
+  <path d="M 8 72 C 26 72, 78 73, 95 74" stroke="#4A9B72" stroke-width="0.7" fill="none" opacity="0.6"/>
+  <path d="M 8 70 C 26 70, 78 51, 95 50" stroke="#3A8AAA" stroke-width="0.7" fill="none" opacity="0.5"/>
+  <path d="M 8 68 C 26 68, 78 34, 95 33" stroke="#A880D8" stroke-width="0.7" fill="none" opacity="0.5"/>
+  <path d="M 8 66 C 26 66, 78 19, 95 18" stroke="#7B52B8" stroke-width="0.7" fill="none" opacity="0.5"/>
+
+  <!-- Convergence dot -->
+  <circle cx="8" cy="70" r="2.8" fill="#1A6080" opacity="0.95"/>
+</svg>

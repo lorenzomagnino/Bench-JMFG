@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="favicon.svg" width="90" alt="Bench-MFG icon"/>
+<img src="favicon_v3.svg" width="90" alt="Bench-MFG icon"/>
 
 # BenchMFG
 
